@@ -1,11 +1,12 @@
 import System.Environment
+import Data.Char
 
 data Piece  = King | Queen | Rook | Bishop | Knight | Pawn
 data Color  = Black | White
 data CPiece = CP Color Piece | Null
 
 type Board    = [[CPiece]]
-type Position = (Integer, Integer)
+type Position = (Int, Int)
 type Move     = (Position, Position)
 
 main :: IO ()
@@ -65,15 +66,38 @@ printPiece (CP White Knight) = "n"
 printPiece (CP White Pawn) = "p"
 printPiece Null = "#"
 
-parseMove :: String -> Move
-parseMove moveStr = ((0,0), (0,0))
+parseMove :: String -> Maybe Move
+parseMove (c1:n1:c2:n2:_) = let start = (ord c1 - ord 'a' + 1, digitToInt n1) in
+                            let end = (ord c2 - ord 'a' + 1, digitToInt n2) in
+                              if validPos start && validPos end
+                              then Just (start, end)
+                              else Nothing
+parseMove _ = Nothing
 
-advanceBoard :: Board -> Move -> Board
-advanceBoard board move = board
+validPos :: Position -> Bool
+validPos (c,r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
+
+validMove :: Board -> Move -> Bool
+validMove board (start, end) = True
+
+advanceBoard :: Board -> Move -> Maybe Board
+advanceBoard board move = if validMove board move
+                          then Just board
+                          else Nothing
 
 loopBoard :: Board -> IO ()
 loopBoard board = do
                     putStrLn (printBoard board)
                     putStrLn "Please enter your move (black): "
                     move <- getLine
-                    loopBoard (advanceBoard board (parseMove move))
+                    let parsedMove = parseMove move in
+                      case parsedMove of
+                        Just mv -> let advancedBoard = advanceBoard board mv in
+                                     case advancedBoard of
+                                       Just bd -> loopBoard bd
+                                       Nothing -> do
+                                                    putStrLn ("ERROR: Invalid move: " ++ move)
+                                                    loopBoard board
+                        Nothing -> do
+                                     putStrLn ("ERROR: Invalid move string: " ++ move)
+                                     loopBoard board
