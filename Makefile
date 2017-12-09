@@ -1,5 +1,5 @@
-chesskell:
-	ghc -v chesskell.hs
+chesskell: chesskell.hs
+	ghc chesskell.hs
 
 clean:
 	rm chesskell *.hi *.o
