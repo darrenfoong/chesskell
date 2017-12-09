@@ -1,2 +1,4 @@
+chesskell
 *.hi
 *.o
+Makefile
