@@ -88,9 +88,9 @@ validMove :: Board -> Move -> Bool
 validMove board (start, end) = case getPiece board start of
                                  Null            -> False
                                  CP startColor startPiece -> case getPiece board end of
-                                                      Null          -> validMovePiece startPiece False (start, end)
-                                                      CP endColor _ -> compareColors startColor endColor &&
-                                                                       validMovePiece startPiece True (start, end)
+                                                               Null          -> validMovePiece startPiece False (start, end)
+                                                               CP endColor _ -> compareColors startColor endColor &&
+                                                                                validMovePiece startPiece True (start, end)
 
 validMovePiece :: Piece -> Bool -> Move -> Bool
 validMovePiece King _ (start, end)     = True
