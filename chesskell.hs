@@ -137,13 +137,12 @@ loopBoard board = do
                     putStrLn (printBoard board)
                     putStrLn "Please enter your move (black): "
                     moveStr <- getLine
-                    let parsedMove = parseMove moveStr in
-                      case parsedMove of
-                        Just move -> case advanceBoard board move of
-                                       Just advancedBoard -> loopBoard advancedBoard
-                                       Nothing -> do
-                                                    putStrLn ("ERROR: Invalid move: " ++ moveStr)
-                                                    loopBoard board
-                        Nothing -> do
-                                     putStrLn ("ERROR: Invalid move string: " ++ moveStr)
-                                     loopBoard board
+                    case parseMove moveStr of
+                      Just move -> case advanceBoard board move of
+                                     Just advancedBoard -> loopBoard advancedBoard
+                                     Nothing -> do
+                                                  putStrLn ("ERROR: Invalid move: " ++ moveStr)
+                                                  loopBoard board
+                      Nothing -> do
+                                   putStrLn ("ERROR: Invalid move string: " ++ moveStr)
+                                   loopBoard board
