@@ -10,8 +10,7 @@ type Position = (Int, Int)
 type Move     = (Position, Position)
 
 main :: IO ()
-main = let board = mkBoard in
-         loopBoard board
+main = loopBoard mkBoard
 
 mkBoard :: Board
 mkBoard = [mkMixedRow Black,
