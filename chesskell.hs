@@ -86,7 +86,7 @@ validPos (c,r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
 
 validMove :: Board -> Move -> Bool
 validMove board (start, end) = case getPiece board start of
-                                 Null            -> False
+                                 Null                     -> False
                                  CP startColor startPiece -> case getPiece board end of
                                                                Null          -> validMovePiece startPiece False (start, end)
                                                                CP endColor _ -> compareColors startColor endColor &&
