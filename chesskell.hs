@@ -80,7 +80,19 @@ validPos :: Position -> Bool
 validPos (c,r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
 
 validMove :: Board -> Move -> Bool
-validMove board (start, end) = True
+validMove board (start, end) = let oldPiece = getPiece board start in
+                                 case oldPiece of
+                                   Null -> False
+                                   _    -> let CP _ piece = oldPiece in
+                                             validMovePiece piece (start, end)
+
+validMovePiece :: Piece -> Move -> Bool
+validMovePiece King (start, end)   = True
+validMovePiece Queen (start, end)  = True
+validMovePiece Rook (start, end)   = True
+validMovePiece Bishop (start, end) = True
+validMovePiece Knight (start, end) = True
+validMovePiece Pawn (start, end)   = True
 
 advanceBoard :: Board -> Move -> Maybe Board
 advanceBoard board move = if validMove board move
