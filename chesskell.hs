@@ -65,9 +65,12 @@ printPiece (CP White Knight) = "n"
 printPiece (CP White Pawn)   = "p"
 printPiece Null              = "#"
 
+makePosition :: (Char, Char) -> Position
+makePosition (c,n) = (ord c - ord 'a' + 1, digitToInt n)
+
 parseMove :: String -> Maybe Move
-parseMove (c1:n1:c2:n2:_) = let start = (ord c1 - ord 'a' + 1, digitToInt n1) in
-                            let end = (ord c2 - ord 'a' + 1, digitToInt n2) in
+parseMove (c1:n1:c2:n2:_) = let start = makePosition (c1,n1)  in
+                            let end = makePosition (c2,n2) in
                               if validPos start && validPos end
                               then Just (start, end)
                               else Nothing
@@ -81,8 +84,18 @@ validMove board (start, end) = True
 
 advanceBoard :: Board -> Move -> Maybe Board
 advanceBoard board move = if validMove board move
-                          then Just board
+                          then Just (movePiece board move)
                           else Nothing
+
+movePiece :: Board -> Move -> Board
+movePiece board (start, end) = let (intermediateBoard, piece) = removePiece board start in
+                                 addPiece intermediateBoard end piece
+
+removePiece :: Board -> Position -> (Board, CPiece)
+removePiece board start = (board, Null)
+
+addPiece :: Board -> Position -> CPiece -> Board
+addPiece board end piece = board
 
 loopBoard :: Board -> IO ()
 loopBoard board = do
