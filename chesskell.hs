@@ -88,14 +88,30 @@ advanceBoard board move = if validMove board move
                           else Nothing
 
 movePiece :: Board -> Move -> Board
-movePiece board (start, end) = let (intermediateBoard, piece) = removePiece board start in
-                                 addPiece intermediateBoard end piece
+movePiece board (start, end) = let (intermediateBoard, oldPiece) = removePiece board start in
+                                 addPiece intermediateBoard end oldPiece
 
-removePiece :: Board -> Position -> (Board, CPiece)
-removePiece board start = (board, Null)
+alterBoardRow :: Board -> Int -> ([CPiece] -> ([CPiece], CPiece)) -> (Board, CPiece)
+alterBoardRow (r:rs) 8 f = let (alteredRow, oldPiece) = f r in
+                             ((alteredRow:rs), oldPiece)
+alterBoardRow (r:rs) n f = let (alteredBoard, oldPiece) = alterBoardRow rs (n+1) f in
+                             (r:alteredBoard, oldPiece)
+
+alterRow :: [CPiece] -> Int -> (CPiece -> CPiece) -> ([CPiece], CPiece)
+alterRow (p:ps) 1 f = ((f p):ps, p)
+alterRow (p:ps) n f = let (alteredRow, oldPiece) =  alterRow ps (n-1) f in
+                               (p:alteredRow, oldPiece)
+
+getPiece :: Board -> Position -> CPiece
+getPiece board (cn,rn) = let (_, oldPiece) = alterBoardRow board rn (\r -> alterRow r cn (\p -> p)) in
+                           oldPiece
 
 addPiece :: Board -> Position -> CPiece -> Board
-addPiece board end piece = board
+addPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\r -> alterRow r cn (\p -> piece)) in
+                                 alteredBoard
+
+removePiece :: Board -> Position -> (Board, CPiece)
+removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\p -> Null))
 
 loopBoard :: Board -> IO ()
 loopBoard board = do
