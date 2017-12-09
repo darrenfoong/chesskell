@@ -52,19 +52,19 @@ printRow :: [CPiece] -> String
 printRow row = foldl (\e x -> e ++ (printPiece x)) "" row
 
 printPiece :: CPiece -> String
-printPiece (CP Black King) = "K"
-printPiece (CP Black Queen) = "Q"
-printPiece (CP Black Rook) = "R"
+printPiece (CP Black King)   = "K"
+printPiece (CP Black Queen)  = "Q"
+printPiece (CP Black Rook)   = "R"
 printPiece (CP Black Bishop) = "B"
 printPiece (CP Black Knight) = "N"
-printPiece (CP Black Pawn) = "P"
-printPiece (CP White King) = "k"
-printPiece (CP White Queen) = "q"
-printPiece (CP White Rook) = "r"
+printPiece (CP Black Pawn)   = "P"
+printPiece (CP White King)   = "k"
+printPiece (CP White Queen)  = "q"
+printPiece (CP White Rook)   = "r"
 printPiece (CP White Bishop) = "b"
 printPiece (CP White Knight) = "n"
-printPiece (CP White Pawn) = "p"
-printPiece Null = "#"
+printPiece (CP White Pawn)   = "p"
+printPiece Null              = "#"
 
 parseMove :: String -> Maybe Move
 parseMove (c1:n1:c2:n2:_) = let start = (ord c1 - ord 'a' + 1, digitToInt n1) in
