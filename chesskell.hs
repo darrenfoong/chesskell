@@ -69,30 +69,37 @@ makePosition :: (Char, Char) -> Position
 makePosition (c,n) = (ord c - ord 'a' + 1, digitToInt n)
 
 parseMove :: String -> Maybe Move
-parseMove (c1:n1:c2:n2:_) = let start = makePosition (c1,n1)  in
-                            let end = makePosition (c2,n2) in
-                              if validPos start && validPos end
-                              then Just (start, end)
-                              else Nothing
+parseMove (sc:sr:ec:er:_) = let start = makePosition (sc,sr) in
+                              let end = makePosition (ec,er) in
+                                if validPos start && validPos end
+                                then Just (start, end)
+                                else Nothing
 parseMove _ = Nothing
+
+compareColors :: Color -> Color -> Bool
+compareColors Black Black = False
+compareColors White White = False
+compareColors _     _     = True
 
 validPos :: Position -> Bool
 validPos (c,r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
 
 validMove :: Board -> Move -> Bool
-validMove board (start, end) = let oldPiece = getPiece board start in
-                                 case oldPiece of
-                                   Null -> False
-                                   _    -> let CP _ piece = oldPiece in
-                                             validMovePiece piece (start, end)
+validMove board (start, end) = case getPiece board start of
+                                 Null            -> False
+                                 CP startColor startPiece -> case getPiece board end of
+                                                      Null          -> validMovePiece startPiece False (start, end)
+                                                      CP endColor _ -> compareColors startColor endColor &&
+                                                                       validMovePiece startPiece True (start, end)
 
-validMovePiece :: Piece -> Move -> Bool
-validMovePiece King (start, end)   = True
-validMovePiece Queen (start, end)  = True
-validMovePiece Rook (start, end)   = True
-validMovePiece Bishop (start, end) = True
-validMovePiece Knight (start, end) = True
-validMovePiece Pawn (start, end)   = True
+validMovePiece :: Piece -> Bool -> Move -> Bool
+validMovePiece King _ (start, end)     = True
+validMovePiece Queen _ (start, end)    = True
+validMovePiece Rook _ (start, end)     = True
+validMovePiece Bishop _ (start, end)   = True
+validMovePiece Knight _ (start, end)   = True
+validMovePiece Pawn True (start, end)  = True
+validMovePiece Pawn False (start, end) = True
 
 advanceBoard :: Board -> Move -> Maybe Board
 advanceBoard board move = if validMove board move
@@ -101,7 +108,7 @@ advanceBoard board move = if validMove board move
 
 movePiece :: Board -> Move -> Board
 movePiece board (start, end) = let (intermediateBoard, oldPiece) = removePiece board start in
-                                 addPiece intermediateBoard end oldPiece
+                                 setPiece intermediateBoard end oldPiece
 
 alterBoardRow :: Board -> Int -> ([CPiece] -> ([CPiece], CPiece)) -> (Board, CPiece)
 alterBoardRow (r:rs) 8 f = let (alteredRow, oldPiece) = f r in
@@ -118,8 +125,8 @@ getPiece :: Board -> Position -> CPiece
 getPiece board (cn,rn) = let (_, oldPiece) = alterBoardRow board rn (\r -> alterRow r cn (\p -> p)) in
                            oldPiece
 
-addPiece :: Board -> Position -> CPiece -> Board
-addPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\r -> alterRow r cn (\p -> piece)) in
+setPiece :: Board -> Position -> CPiece -> Board
+setPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\r -> alterRow r cn (\p -> piece)) in
                                  alteredBoard
 
 removePiece :: Board -> Position -> (Board, CPiece)
@@ -129,15 +136,14 @@ loopBoard :: Board -> IO ()
 loopBoard board = do
                     putStrLn (printBoard board)
                     putStrLn "Please enter your move (black): "
-                    move <- getLine
-                    let parsedMove = parseMove move in
+                    moveStr <- getLine
+                    let parsedMove = parseMove moveStr in
                       case parsedMove of
-                        Just mv -> let advancedBoard = advanceBoard board mv in
-                                     case advancedBoard of
-                                       Just bd -> loopBoard bd
+                        Just move -> case advanceBoard board move of
+                                       Just advancedBoard -> loopBoard advancedBoard
                                        Nothing -> do
-                                                    putStrLn ("ERROR: Invalid move: " ++ move)
+                                                    putStrLn ("ERROR: Invalid move: " ++ moveStr)
                                                     loopBoard board
                         Nothing -> do
-                                     putStrLn ("ERROR: Invalid move string: " ++ move)
+                                     putStrLn ("ERROR: Invalid move string: " ++ moveStr)
                                      loopBoard board
