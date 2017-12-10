@@ -86,30 +86,33 @@ validPos (c,r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
 
 -- todo: line of sight check
 -- todo: checkmate check
--- todo: pawn first move
 
 validMove :: Board -> Move -> Bool
 validMove board (start, end) = start /= end &&
-                               case getPiece board start of
-                                 Null                     -> False
-                                 CP startColor startPiece -> case getPiece board end of
-                                                               Null          -> validMovePiece startPiece False (start, end)
-                                                               CP endColor _ -> compareColors startColor endColor &&
-                                                                                validMovePiece startPiece True (start, end)
+                               let startPiece = getPiece board start in
+                                 case getPiece board end of
+                                    Null          -> validMovePiece startPiece False (start, end)
+                                    CP endColor _ -> let CP startColor _ = startPiece in
+                                                       compareColors startColor endColor &&
+                                                       validMovePiece startPiece True (start, end)
 
-validMovePiece :: Piece -> Bool -> Move -> Bool
-validMovePiece King _     ((sc,sr), (ec,er)) = ((sc-ec) == 0 && abs(er-sr) == 1) ||
-                                               ((er-sr) == 0 && abs(sc-ec) == 1) ||
-                                               ((sc-ec) == (er-sr) && abs(sc-ec) == 1)
-validMovePiece Queen attack     (start, end) = validMovePiece Rook attack (start, end) || validMovePiece Bishop attack (start, end)
-validMovePiece Rook _     ((sc,sr), (ec,er)) = (sc-ec) == 0 || (er-sr) == 0
-validMovePiece Bishop _   ((sc,sr), (ec,er)) = (sc-ec) == (er-sr)
-validMovePiece Knight _   ((sc,sr), (ec,er)) = let cdiff = (sc-ec) in
-                                                 let rdiff = (er-sr) in
-                                                   (abs(cdiff) == 1 && abs(rdiff) == 2) ||
-                                                   (abs(cdiff) == 2 && abs(rdiff) == 1)
-validMovePiece Pawn True  ((sc,sr), (ec,er)) = (sc-ec) == 1 && (er-sr) == 1
-validMovePiece Pawn False ((sc,sr), (ec,er)) = (sc-ec) == 0 && (er-sr) <= 1
+validMovePiece :: CPiece -> Bool -> Move -> Bool
+validMovePiece Null          _   _                  = False
+validMovePiece (CP _ King)   _   ((sc,sr), (ec,er)) = ((sc-ec) == 0 && abs(er-sr) == 1) ||
+                                                      ((er-sr) == 0 && abs(sc-ec) == 1) ||
+                                                      ((sc-ec) == (er-sr) && abs(sc-ec) == 1)
+validMovePiece (CP color Queen) attack (start, end) = validMovePiece (CP color Rook) attack (start, end) ||
+                                                      validMovePiece (CP color Bishop) attack (start, end)
+validMovePiece (CP _ Rook)   _   ((sc,sr), (ec,er)) = (sc-ec) == 0 || (er-sr) == 0
+validMovePiece (CP _ Bishop) _   ((sc,sr), (ec,er)) = (sc-ec) == (er-sr)
+validMovePiece (CP _ Knight) _   ((sc,sr), (ec,er)) = let cdiff = (sc-ec) in
+                                                        let rdiff = (er-sr) in
+                                                          (abs(cdiff) == 1 && abs(rdiff) == 2) ||
+                                                          (abs(cdiff) == 2 && abs(rdiff) == 1)
+validMovePiece (CP Black Pawn) True  ((sc,sr), (ec,er)) = abs(sc-ec) == 1 && (er-sr) == (-1)
+validMovePiece (CP White Pawn) True  ((sc,sr), (ec,er)) = abs(sc-ec) == 1 && (er-sr) == 1
+validMovePiece (CP Black Pawn) False ((sc,sr), (ec,er)) = (sc-ec) == 0 && ((er-sr) == (-1) || (sr == 7 && (er-sr) == (-2)))
+validMovePiece (CP White Pawn) False ((sc,sr), (ec,er)) = (sc-ec) == 0 && ((er-sr) == 1 || (sr == 2 && (er-sr) == 2))
 
 advanceBoard :: Board -> Move -> Maybe Board
 advanceBoard board move = if validMove board move
