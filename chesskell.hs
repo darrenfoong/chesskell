@@ -176,7 +176,7 @@ alterRow (p:ps) n f = let (alteredRow, oldPiece) = alterRow ps (n-1) f in
                                (p:alteredRow, oldPiece)
 
 getPiece :: Board -> Position -> CPiece
-getPiece board (cn,rn) = let (_, oldPiece) = alterBoardRow board rn (\r -> alterRow r cn (\p -> p)) in
+getPiece board (cn,rn) = let (_, oldPiece) = alterBoardRow board rn (\r -> alterRow r cn id) in
                            oldPiece
 
 setPiece :: Board -> Position -> CPiece -> Board
