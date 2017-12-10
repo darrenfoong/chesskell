@@ -91,18 +91,20 @@ validMove :: Board -> Move -> Bool
 validMove board (start, end) = start /= end &&
                                let startPiece = getPiece board start in
                                  case getPiece board end of
-                                    Null          -> validMovePiece startPiece False (start, end)
+                                    Null          -> validMovePiece startPiece False (start, end) &&
+                                                     checkLineOfSight board startPiece (start, end)
                                     CP endColor _ -> let CP startColor _ = startPiece in
                                                        compareColors startColor endColor &&
-                                                       validMovePiece startPiece True (start, end)
+                                                       validMovePiece startPiece True (start, end) &&
+                                                       checkLineOfSight board startPiece (start, end)
 
 validMovePiece :: CPiece -> Bool -> Move -> Bool
 validMovePiece Null          _   _                  = False
 validMovePiece (CP _ King)   _   ((sc,sr), (ec,er)) = ((sc-ec) == 0 && abs(er-sr) == 1) ||
                                                       ((er-sr) == 0 && abs(sc-ec) == 1) ||
                                                       ((sc-ec) == (er-sr) && abs(sc-ec) == 1)
-validMovePiece (CP color Queen) attack (start, end) = validMovePiece (CP color Rook) attack (start, end) ||
-                                                      validMovePiece (CP color Bishop) attack (start, end)
+validMovePiece (CP color Queen) attack move = validMovePiece (CP color Rook) attack move ||
+                                                      validMovePiece (CP color Bishop) attack move
 validMovePiece (CP _ Rook)   _   ((sc,sr), (ec,er)) = (sc-ec) == 0 || (er-sr) == 0
 validMovePiece (CP _ Bishop) _   ((sc,sr), (ec,er)) = (sc-ec) == (er-sr)
 validMovePiece (CP _ Knight) _   ((sc,sr), (ec,er)) = let cdiff = (sc-ec) in
@@ -113,6 +115,43 @@ validMovePiece (CP Black Pawn) True  ((sc,sr), (ec,er)) = abs(sc-ec) == 1 && (er
 validMovePiece (CP White Pawn) True  ((sc,sr), (ec,er)) = abs(sc-ec) == 1 && (er-sr) == 1
 validMovePiece (CP Black Pawn) False ((sc,sr), (ec,er)) = (sc-ec) == 0 && ((er-sr) == (-1) || (sr == 7 && (er-sr) == (-2)))
 validMovePiece (CP White Pawn) False ((sc,sr), (ec,er)) = (sc-ec) == 0 && ((er-sr) == 1 || (sr == 2 && (er-sr) == 2))
+
+checkLineOfSight :: Board -> CPiece -> Move -> Bool
+checkLineOfSight _ (CP _ King) _ = True
+checkLineOfSight board (CP color Queen) move = checkLineOfSight board (CP color Rook) move ||
+                                               checkLineOfSight board (CP color Bishop) move
+checkLineOfSight board (CP _ Rook) (start, end) = checkLineOfSightPos board (mkPos start end)
+checkLineOfSight board (CP _ Bishop) (start, end) = checkLineOfSightPos board (mkPos start end)
+checkLineOfSight _ (CP _ Knight) _ = True
+checkLineOfSight board (CP _ Pawn) ((sc,sr), (ec,er)) = if (er-sr) == 2
+                                                        then checkLineOfSightPos board [(sc,sr+1)]
+                                                        else if (er-sr) == -2
+                                                             then checkLineOfSightPos board [(sc,sr-1)]
+                                                             else True
+
+compareToInt :: Int -> Int -> Int
+compareToInt a b = if a > b
+                   then 1
+                   else if a < b
+                        then -1
+                        else 0
+
+mkPos :: Position -> Position -> [Position]
+mkPos (sc,sr) (ec,er) = let cdelta = compareToInt sc ec in
+                          let rdelta = compareToInt er sr in
+                             mkPosInner (sc,sr) (ec,er) cdelta rdelta
+
+mkPosInner :: Position -> Position -> Int -> Int -> [Position]
+mkPosInner (sc,sr) (ec,er) cdelta rdelta = if sc+cdelta == ec && sr+rdelta == er
+                                           then []
+                                           else let newStart = (sc+cdelta,sr+rdelta) in
+                                                  newStart : mkPosInner newStart (ec,er) cdelta rdelta
+
+checkLineOfSightPos :: Board -> [Position] -> Bool
+checkLineOfSightPos _     []     = True
+checkLineOfSightPos board (p:ps) = case getPiece board p of
+                                     Null -> checkLineOfSightPos board ps
+                                     _    -> False
 
 advanceBoard :: Board -> Move -> Maybe Board
 advanceBoard board move = if validMove board move
