@@ -84,8 +84,13 @@ compareColors _     _     = True
 validPos :: Position -> Bool
 validPos (c,r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
 
+-- todo: line of sight check
+-- todo: checkmate check
+-- todo: pawn first move
+
 validMove :: Board -> Move -> Bool
-validMove board (start, end) = case getPiece board start of
+validMove board (start, end) = start /= end &&
+                               case getPiece board start of
                                  Null                     -> False
                                  CP startColor startPiece -> case getPiece board end of
                                                                Null          -> validMovePiece startPiece False (start, end)
@@ -93,13 +98,18 @@ validMove board (start, end) = case getPiece board start of
                                                                                 validMovePiece startPiece True (start, end)
 
 validMovePiece :: Piece -> Bool -> Move -> Bool
-validMovePiece King _ (start, end)     = True
-validMovePiece Queen _ (start, end)    = True
-validMovePiece Rook _ (start, end)     = True
-validMovePiece Bishop _ (start, end)   = True
-validMovePiece Knight _ (start, end)   = True
-validMovePiece Pawn True (start, end)  = True
-validMovePiece Pawn False (start, end) = True
+validMovePiece King _     ((sc,sr), (ec,er)) = ((sc-ec) == 0 && abs(er-sr) == 1) ||
+                                               ((er-sr) == 0 && abs(sc-ec) == 1) ||
+                                               ((sc-ec) == (er-sr) && abs(sc-ec) == 1)
+validMovePiece Queen attack     (start, end) = validMovePiece Rook attack (start, end) || validMovePiece Bishop attack (start, end)
+validMovePiece Rook _     ((sc,sr), (ec,er)) = (sc-ec) == 0 || (er-sr) == 0
+validMovePiece Bishop _   ((sc,sr), (ec,er)) = (sc-ec) == (er-sr)
+validMovePiece Knight _   ((sc,sr), (ec,er)) = let cdiff = (sc-ec) in
+                                                 let rdiff = (er-sr) in
+                                                   (abs(cdiff) == 1 && abs(rdiff) == 2) ||
+                                                   (abs(cdiff) == 2 && abs(rdiff) == 1)
+validMovePiece Pawn True  ((sc,sr), (ec,er)) = (sc-ec) == 1 && (er-sr) == 1
+validMovePiece Pawn False ((sc,sr), (ec,er)) = (sc-ec) == 0 && (er-sr) <= 1
 
 advanceBoard :: Board -> Move -> Maybe Board
 advanceBoard board move = if validMove board move
