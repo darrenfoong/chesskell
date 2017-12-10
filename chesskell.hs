@@ -1,4 +1,3 @@
-import System.Environment
 import Data.Char
 
 data Piece  = King | Queen | Rook | Bishop | Knight | Pawn
@@ -117,13 +116,14 @@ validMovePiece (CP Black Pawn) False ((sc,sr), (ec,er)) = (sc-ec) == 0 && ((er-s
 validMovePiece (CP White Pawn) False ((sc,sr), (ec,er)) = (sc-ec) == 0 && ((er-sr) == 1 || (sr == 2 && (er-sr) == 2))
 
 checkLineOfSight :: Board -> CPiece -> Move -> Bool
+checkLineOfSight _ Null _ = False
 checkLineOfSight _ (CP _ King) _ = True
 checkLineOfSight board (CP color Queen) move = checkLineOfSight board (CP color Rook) move ||
                                                checkLineOfSight board (CP color Bishop) move
 checkLineOfSight board (CP _ Rook) (start, end) = checkLineOfSightPos board (mkPos start end)
 checkLineOfSight board (CP _ Bishop) (start, end) = checkLineOfSightPos board (mkPos start end)
 checkLineOfSight _ (CP _ Knight) _ = True
-checkLineOfSight board (CP _ Pawn) ((sc,sr), (ec,er)) = if (er-sr) == 2
+checkLineOfSight board (CP _ Pawn) ((sc,sr), (_,er)) = if (er-sr) == 2
                                                         then checkLineOfSightPos board [(sc,sr+1)]
                                                         else if (er-sr) == -2
                                                              then checkLineOfSightPos board [(sc,sr-1)]
@@ -163,14 +163,16 @@ movePiece board (start, end) = let (intermediateBoard, oldPiece) = removePiece b
                                  setPiece intermediateBoard end oldPiece
 
 alterBoardRow :: Board -> Int -> ([CPiece] -> ([CPiece], CPiece)) -> (Board, CPiece)
+alterBoardRow []     _ _ = ([], Null)
 alterBoardRow (r:rs) 8 f = let (alteredRow, oldPiece) = f r in
                              ((alteredRow:rs), oldPiece)
 alterBoardRow (r:rs) n f = let (alteredBoard, oldPiece) = alterBoardRow rs (n+1) f in
                              (r:alteredBoard, oldPiece)
 
 alterRow :: [CPiece] -> Int -> (CPiece -> CPiece) -> ([CPiece], CPiece)
+alterRow []     _ _ = ([], Null)
 alterRow (p:ps) 1 f = ((f p):ps, p)
-alterRow (p:ps) n f = let (alteredRow, oldPiece) =  alterRow ps (n-1) f in
+alterRow (p:ps) n f = let (alteredRow, oldPiece) = alterRow ps (n-1) f in
                                (p:alteredRow, oldPiece)
 
 getPiece :: Board -> Position -> CPiece
@@ -178,11 +180,11 @@ getPiece board (cn,rn) = let (_, oldPiece) = alterBoardRow board rn (\r -> alter
                            oldPiece
 
 setPiece :: Board -> Position -> CPiece -> Board
-setPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\r -> alterRow r cn (\p -> piece)) in
+setPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> piece)) in
                                  alteredBoard
 
 removePiece :: Board -> Position -> (Board, CPiece)
-removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\p -> Null))
+removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> Null))
 
 loopBoard :: Board -> IO ()
 loopBoard board = do
