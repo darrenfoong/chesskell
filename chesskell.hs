@@ -87,6 +87,14 @@ compareColors Black Black = False
 compareColors White White = False
 compareColors _     _     = True
 
+printColor :: Color -> String
+printColor Black = "black"
+printColor White = "white"
+
+swapColor :: Color -> Color
+swapColor Black = White
+swapColor White = Black
+
 validPos :: Position -> Bool
 validPos (c,r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
 
@@ -197,11 +205,11 @@ removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> N
 loopBoard :: Board -> Color -> IO ()
 loopBoard board color = do
                           putStrLn (printBoard board True)
-                          putStrLn "Please enter your move (white): "
+                          putStrLn ("Please enter your move (" ++ printColor color ++ "): ")
                           moveStr <- getLine
                           case parseMove moveStr of
                             Just move -> case advanceBoard board move color of
-                                           Just advancedBoard -> loopBoard advancedBoard color
+                                           Just advancedBoard -> loopBoard advancedBoard (swapColor color)
                                            Nothing -> do
                                                         putStrLn ("ERROR: Invalid move: " ++ moveStr)
                                                         loopBoard board color
