@@ -202,8 +202,12 @@ setPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\
 removePiece :: Board -> Position -> (Board, CPiece)
 removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> Null))
 
-respondBoard :: Board -> Color -> Board
-respondBoard board _ = board
+respondBoard :: Board -> Color -> Maybe Board
+respondBoard board color = let move = genMove board color in
+                         advanceBoard board move color
+
+genMove :: Board -> Color -> Move
+genMove _ _ = ((4,7),(4,5))
 
 loopBoard :: Board -> Color -> IO ()
 loopBoard board color = do
@@ -212,7 +216,11 @@ loopBoard board color = do
                           moveStr <- getLine
                           case parseMove moveStr of
                             Just move -> case advanceBoard board move color of
-                                           Just advancedBoard -> loopBoard (respondBoard advancedBoard (swapColor color)) color
+                                           Just advancedBoard -> case respondBoard advancedBoard (swapColor color) of
+                                                                   Just respondedBoard -> loopBoard respondedBoard color
+                                                                   Nothing -> do
+                                                                                putStrLn ("ERROR: Program has made an invalid move")
+                                                                                loopBoard board color
                                            Nothing -> do
                                                         putStrLn ("ERROR: Invalid move: " ++ moveStr)
                                                         loopBoard board color
