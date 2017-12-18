@@ -103,15 +103,17 @@ validPos (c,r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
 validMove :: Board -> Move -> Color -> Bool
 validMove board (start, end) color = start /= end &&
                                      let startPiece = getPiece board start in
-                                       let CP startColor _ = startPiece in
-                                         if not (compareColors startColor color)
-                                         then case getPiece board end of
-                                                Null          -> validMovePiece startPiece False (start, end) &&
-                                                                 checkLineOfSight board startPiece (start, end)
-                                                CP endColor _ -> compareColors startColor endColor &&
-                                                                 validMovePiece startPiece True (start, end) &&
-                                                                 checkLineOfSight board startPiece (start, end)
-                                         else False
+                                       case startPiece of
+                                         CP startColor _ ->
+                                           if not (compareColors startColor color)
+                                           then case getPiece board end of
+                                                  Null          -> validMovePiece startPiece False (start, end) &&
+                                                                   checkLineOfSight board startPiece (start, end)
+                                                  CP endColor _ -> compareColors startColor endColor &&
+                                                                   validMovePiece startPiece True (start, end) &&
+                                                                   checkLineOfSight board startPiece (start, end)
+                                           else False
+                                         Null -> False
 
 validMovePiece :: CPiece -> Bool -> Move -> Bool
 validMovePiece Null            _      _                  = False
