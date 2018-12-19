@@ -37,6 +37,17 @@ mkPawnRow color = replicate 8 (CP color Pawn)
 mkBlankRow :: [CPiece]
 mkBlankRow = replicate 8 Null
 
+mkCoords :: [Position]
+mkCoords = mkCoordsInner 8 8
+
+mkCoordsInner :: Int -> Int -> [Position]
+mkCoordsInner _  0  = []
+mkCoordsInner nc nr = (mkCoordsInner nc (nr-1)) ++ (mkCoordsInnerRow nc nr)
+
+mkCoordsInnerRow :: Int -> Int -> [Position]
+mkCoordsInnerRow 0 _ = []
+mkCoordsInnerRow nc nr = (nc, nr):(mkCoordsInnerRow (nc-1) nr)
+
 printBoard :: Board -> Bool -> String
 printBoard board False = printBoardInner (reverse board) 8
 printBoard board True  = printBoardInnerDebug board 1
@@ -205,11 +216,24 @@ removePiece :: Board -> Position -> (Board, CPiece)
 removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> Null))
 
 respondBoard :: Board -> Color -> Maybe Board
-respondBoard board color = let move = genMove board color in
-                         advanceBoard board move color
+respondBoard board color = case genMove board color of
+                             Just m  -> advanceBoard board m color
+                             Nothing -> Nothing
 
-genMove :: Board -> Color -> Move
-genMove _ _ = ((4,7),(4,5))
+genMove :: Board -> Color -> Maybe Move
+genMove board color = case foldl (++) [] (map (\position -> genPossibleMovesPiece board position) (genPositions board color)) of
+                        []  -> Nothing
+                        m:_ -> Just m
+
+genPositions :: Board -> Color -> [Position]
+genPositions board color = foldl (\ps p -> case getPiece board p of
+                                             CP clr _ -> if not (compareColors color clr) then p:ps else ps
+                                             _        -> ps) [] mkCoords
+
+genPossibleMovesPiece :: Board -> Position -> [Move]
+genPossibleMovesPiece board position = case getPiece board position of
+                                         CP color _ -> filter (\move -> validMove board move color) (map (\pos -> (position, pos)) mkCoords)
+                                         _          -> []
 
 loopBoard :: Board -> Color -> IO ()
 loopBoard board color = do
