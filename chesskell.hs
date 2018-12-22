@@ -145,11 +145,10 @@ checkLineOfSight board (CP _ Pawn)   ((sc,sr), (_,er)) = if (er-sr) == 2
                                                              else True
 
 compareToInt :: Int -> Int -> Int
-compareToInt a b = if a > b
-                   then -1
-                   else if a < b
-                        then 1
-                        else 0
+compareToInt a b
+  | a > b     = -1
+  | a < b     = 1
+  | otherwise = 0
 
 mkPos :: Position -> Position -> [Position]
 mkPos (sc,sr) (ec,er) = let cdelta = compareToInt sc ec
