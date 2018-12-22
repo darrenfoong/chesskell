@@ -78,8 +78,8 @@ makePosition :: (Char, Char) -> Position
 makePosition (c,n) = (ord c - ord 'a' + 1, digitToInt n)
 
 parseMove :: String -> Maybe Move
-parseMove (sc:sr:ec:er:_) = let start = makePosition (sc,sr) in
-                              let end = makePosition (ec,er) in
+parseMove (sc:sr:ec:er:_) = let start = makePosition (sc,sr)
+                                end = makePosition (ec,er) in
                                 if validPos start && validPos end
                                 then Just (start, end)
                                 else Nothing
@@ -127,8 +127,8 @@ validMovePiece (CP color Queen) attack move             = validMovePiece (CP col
                                                           validMovePiece (CP color Bishop) attack move
 validMovePiece (CP _ Rook)     _     ((sc,sr), (ec,er)) = ec == sc || er == sr
 validMovePiece (CP _ Bishop)   _     ((sc,sr), (ec,er)) = abs(ec-sc) == abs(er-sr)
-validMovePiece (CP _ Knight)   _     ((sc,sr), (ec,er)) = let cdiff = (ec-sc) in
-                                                            let rdiff = (er-sr) in
+validMovePiece (CP _ Knight)   _     ((sc,sr), (ec,er)) = let cdiff = (ec-sc)
+                                                              rdiff = (er-sr) in
                                                               (abs(cdiff) == 1 && abs(rdiff) == 2) ||
                                                               (abs(cdiff) == 2 && abs(rdiff) == 1)
 validMovePiece (CP Black Pawn) True  ((sc,sr), (ec,er)) = abs(ec-sc) == 1 && (er-sr) == (-1)
