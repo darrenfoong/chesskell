@@ -1,7 +1,7 @@
 import Data.Char
 
-data Piece  = King | Queen | Rook | Bishop | Knight | Pawn
-data Color  = Black | White
+data Piece  = King | Queen | Rook | Bishop | Knight | Pawn deriving Eq
+data Color  = Black | White deriving Eq
 data CPiece = CP Color Piece | Null
 
 type Board    = [[CPiece]]
@@ -85,11 +85,6 @@ parseMove (sc:sr:ec:er:_) = let start = makePosition (sc,sr)
                                 else Nothing
 parseMove _ = Nothing
 
-compareColors :: Color -> Color -> Bool
-compareColors Black Black = False
-compareColors White White = False
-compareColors _     _     = True
-
 printColor :: Color -> String
 printColor Black = "black"
 printColor White = "white"
@@ -108,11 +103,11 @@ validMove board (start, end) color = start /= end &&
                                      let startPiece = getPiece board start in
                                        case startPiece of
                                          CP startColor _ ->
-                                           if not (compareColors startColor color)
+                                           if startColor == color
                                            then case getPiece board end of
                                                   Null          -> validMovePiece startPiece False (start, end) &&
                                                                    checkLineOfSight board startPiece (start, end)
-                                                  CP endColor _ -> compareColors startColor endColor &&
+                                                  CP endColor _ -> startColor /= endColor &&
                                                                    validMovePiece startPiece True (start, end) &&
                                                                    checkLineOfSight board startPiece (start, end)
                                            else False
@@ -212,7 +207,7 @@ genMove board color = case foldl (++) [] (map (\position -> genPossibleMovesPiec
 
 genPositions :: Board -> Color -> [Position]
 genPositions board color = foldl (\ps p -> case getPiece board p of
-                                             CP clr _ -> if not (compareColors color clr) then p:ps else ps
+                                             CP clr _ -> if color == clr then p:ps else ps
                                              _        -> ps) [] mkCoords
 
 genPossibleMovesPiece :: Board -> Position -> [Move]
