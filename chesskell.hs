@@ -158,15 +158,9 @@ compareToInt a b = if a > b
                         else 0
 
 mkPos :: Position -> Position -> [Position]
-mkPos (sc,sr) (ec,er) = mkPosInner (sc,sr) (ec,er) (compareToInt sc ec) (compareToInt sr er)
-
-mkPosInner :: Position -> Position -> Int -> Int -> [Position]
-mkPosInner (sc,sr) (ec,er) cdelta rdelta = let newSc = sc + cdelta in
-                                             let newSr = sr + rdelta in
-                                               if newSc == ec && newSr == er
-                                               then []
-                                               else let newStart = (newSc, newSr) in
-                                                      newStart : mkPosInner newStart (ec,er) cdelta rdelta
+mkPos (sc,sr) (ec,er) = let cdelta = compareToInt sc ec
+                            rdelta = compareToInt sr er in
+                          [(c,r) | c <- [sc,sc+cdelta..ec], r <- [sr,sr+rdelta..er]]
 
 checkLineOfSightPos :: Board -> [Position] -> Bool
 checkLineOfSightPos _     []     = True
