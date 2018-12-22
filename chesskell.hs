@@ -38,15 +38,7 @@ mkBlankRow :: [CPiece]
 mkBlankRow = replicate 8 Null
 
 mkCoords :: [Position]
-mkCoords = mkCoordsInner 8 8
-
-mkCoordsInner :: Int -> Int -> [Position]
-mkCoordsInner _  0  = []
-mkCoordsInner nc nr = (mkCoordsInner nc (nr-1)) ++ (mkCoordsInnerRow nc nr)
-
-mkCoordsInnerRow :: Int -> Int -> [Position]
-mkCoordsInnerRow 0 _ = []
-mkCoordsInnerRow nc nr = (nc, nr):(mkCoordsInnerRow (nc-1) nr)
+mkCoords = [(c,r) | c <- [1..8], r <- [1..8]]
 
 printBoard :: Board -> Bool -> String
 printBoard board False = printBoardInner (reverse board) 8
