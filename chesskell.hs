@@ -138,11 +138,10 @@ checkLineOfSight board (CP color Queen) move           = checkLineOfSight board 
 checkLineOfSight board (CP _ Rook)   (start, end)      = checkLineOfSightPos board (mkPos start end)
 checkLineOfSight board (CP _ Bishop) (start, end)      = checkLineOfSightPos board (mkPos start end)
 checkLineOfSight _     (CP _ Knight) _                 = True
-checkLineOfSight board (CP _ Pawn)   ((sc,sr), (_,er)) = if (er-sr) == 2
-                                                        then checkLineOfSightPos board [(sc,sr+1)]
-                                                        else if (er-sr) == -2
-                                                             then checkLineOfSightPos board [(sc,sr-1)]
-                                                             else True
+checkLineOfSight board (CP _ Pawn)   ((sc,sr), (_,er))
+  | (er-sr) == 2  = checkLineOfSightPos board [(sc,sr+1)]
+  | (er-sr) == -2 = checkLineOfSightPos board [(sc,sr-1)]
+  | otherwise     = True
 
 compareToInt :: Int -> Int -> Int
 compareToInt a b
