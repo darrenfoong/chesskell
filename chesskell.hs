@@ -214,19 +214,19 @@ genPossibleMovesPiece board position = case getPiece board position of
 
 loopBoard :: Board -> Color -> IO ()
 loopBoard board color = do
-                          putStrLn (printBoard board True)
-                          putStrLn ("Please enter your move (" ++ printColor color ++ "): ")
+                          putStrLn $ printBoard board True
+                          putStrLn $ "Please enter your move (" ++ printColor color ++ "): "
                           moveStr <- getLine
                           case parseMove moveStr of
                             Just move -> case advanceBoard board move color of
                                            Just advancedBoard -> case respondBoard advancedBoard (swapColor color) of
                                                                    Just respondedBoard -> loopBoard respondedBoard color
                                                                    Nothing -> do
-                                                                                putStrLn ("ERROR: Program has made an invalid move")
+                                                                                putStrLn $ "ERROR: Program has made an invalid move"
                                                                                 loopBoard board color
                                            Nothing -> do
-                                                        putStrLn ("ERROR: Invalid move: " ++ moveStr)
+                                                        putStrLn $ "ERROR: Invalid move: " ++ moveStr
                                                         loopBoard board color
                             Nothing -> do
-                                         putStrLn ("ERROR: Invalid move string: " ++ moveStr)
+                                         putStrLn $ "ERROR: Invalid move string: " ++ moveStr
                                          loopBoard board color
