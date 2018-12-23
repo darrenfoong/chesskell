@@ -198,7 +198,7 @@ respondBoard board color = case genMove board color of
                              Nothing -> Nothing
 
 genMove :: Board -> Color -> Maybe Move
-genMove board color = case concat (map (\position -> genPossibleMovesPiece board position) (genPositions board color)) of
+genMove board color = case concat $ map (\position -> genPossibleMovesPiece board position) (genPositions board color) of
                         []  -> Nothing
                         m:_ -> Just m
 
