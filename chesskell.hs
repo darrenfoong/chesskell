@@ -57,7 +57,7 @@ printBoardInnerDebug (r:rs) n = (show n) ++ " " ++
 printBoardInnerDebug [] _ = "  12345678" ++ "\n" ++ "  abcdefgh"
 
 printRow :: [CPiece] -> String
-printRow row = foldl (\e x -> e ++ (printPiece x)) "" row
+printRow = foldl (\e x -> e ++ (printPiece x)) ""
 
 printPiece :: CPiece -> String
 printPiece (CP Black King)   = "K"
