@@ -57,7 +57,7 @@ printBoardInnerDebug (r:rs) n = (show n) ++ " " ++
 printBoardInnerDebug [] _ = "  12345678" ++ "\n" ++ "  abcdefgh"
 
 printRow :: [CPiece] -> String
-printRow = concat . map printPiece
+printRow = concatMap printPiece
 
 printPiece :: CPiece -> String
 printPiece (CP Black King)   = "K"
