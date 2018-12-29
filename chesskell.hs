@@ -1,7 +1,8 @@
 import Data.Char
+import Control.Monad
 
 data Piece  = King | Queen | Rook | Bishop | Knight | Pawn deriving Eq
-data Color  = Black | White deriving Eq
+data Color  = Black | White deriving (Eq, Show)
 data CPiece = CP Color Piece | Null
 
 type Board    = [[CPiece]]
@@ -74,10 +75,6 @@ parseMove (sc:sr:ec:er:_) = let start = makePosition (sc,sr)
                                 then Just (start, end)
                                 else Nothing
 parseMove _ = Nothing
-
-printColor :: Color -> String
-printColor Black = "black"
-printColor White = "white"
 
 swapColor :: Color -> Color
 swapColor Black = White
@@ -203,20 +200,14 @@ genPossibleMovesPiece board position = case getPiece board position of
                                          _          -> []
 
 loopBoard :: Board -> Color -> IO ()
-loopBoard board color = do
+loopBoard board color = forever $ do
                           putStrLn $ printBoard board True
-                          putStrLn $ "Please enter your move (" ++ printColor color ++ "): "
+                          putStrLn $ "Please enter your move (" ++ show color ++ "): "
                           moveStr <- getLine
                           case parseMove moveStr of
                             Just move -> case advanceBoard board move color of
-                                           Just advancedBoard -> case respondBoard advancedBoard (swapColor color) of
+                                           Just advancedBoard -> case respondBoard advancedBoard $ swapColor color of
                                                                    Just respondedBoard -> loopBoard respondedBoard color
-                                                                   Nothing -> do
-                                                                                putStrLn $ "ERROR: Program has made an invalid move"
-                                                                                loopBoard board color
-                                           Nothing -> do
-                                                        putStrLn $ "ERROR: Invalid move: " ++ moveStr
-                                                        loopBoard board color
-                            Nothing -> do
-                                         putStrLn $ "ERROR: Invalid move string: " ++ moveStr
-                                         loopBoard board color
+                                                                   Nothing -> putStrLn $ "ERROR: Program has made an invalid move"
+                                           Nothing -> putStrLn $ "ERROR: Invalid move: " ++ moveStr
+                            Nothing -> putStrLn $ "ERROR: Invalid move string: " ++ moveStr
