@@ -68,6 +68,15 @@ printPiece (CP White Knight) = "n"
 printPiece (CP White Pawn)   = "p"
 printPiece Null              = "#"
 
+scorePiece :: CPiece -> Int
+scorePiece (CP _ King)   = 0
+scorePiece (CP _ Queen)  = 9
+scorePiece (CP _ Rook)   = 5
+scorePiece (CP _ Bishop) = 3
+scorePiece (CP _ Knight) = 3
+scorePiece (CP _ Pawn)   = 1
+scorePiece Null          = 0
+
 makePosition :: (Char, Char) -> Position
 makePosition (c,n) = (ord c - ord 'a' + 1, digitToInt n)
 
