@@ -77,6 +77,13 @@ scorePiece (CP _ Knight) = 3
 scorePiece (CP _ Pawn)   = 1
 scorePiece Null          = 0
 
+scoreColorPiece :: Color -> CPiece -> Int
+scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
+scoreColorPiece _ Null = 0
+
+scoreBoard :: Color -> Board -> Int
+scoreBoard color = sum . map (sum . map (scoreColorPiece color))
+
 makePosition :: (Char, Char) -> Position
 makePosition (c,n) = (ord c - ord 'a' + 1, digitToInt n)
 
