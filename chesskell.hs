@@ -41,20 +41,10 @@ mkCoords :: [Position]
 mkCoords = [(c,r) | c <- [1..8], r <- [1..8]]
 
 printBoard :: Board -> Bool -> String
-printBoard board False = printBoardInner (reverse board) 8
-printBoard board True  = printBoardInnerDebug board 1
-
-printBoardInner :: Board -> Int -> String
-printBoardInner (r:rs) n = (show n) ++ " " ++
-                           (printRow r) ++ "\n" ++
-                           printBoardInner rs (n-1)
-printBoardInner [] _ = "  abcdefgh"
-
-printBoardInnerDebug :: Board -> Int -> String
-printBoardInnerDebug (r:rs) n = (show n) ++ " " ++
-                           (printRow r) ++ "\n" ++
-                           printBoardInnerDebug rs (n+1)
-printBoardInnerDebug [] _ = "  12345678" ++ "\n" ++ "  abcdefgh"
+printBoard board debug = let result = map (\(r,n) -> show n ++ " " ++ printRow r) $ f $ zip board ([1..8] :: [Int]) in
+                           unlines $ result ++ extraLines
+                         where f = if debug then id else reverse
+                               extraLines = if debug then ["  12345678", "  abcdefgh"] else ["  abcdefgh"]
 
 printRow :: [CPiece] -> String
 printRow = concatMap printPiece
