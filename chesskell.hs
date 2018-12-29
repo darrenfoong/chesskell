@@ -1,5 +1,6 @@
 import Data.Char
 import Control.Monad
+import System.Random
 
 data Piece  = King | Queen | Rook | Bishop | Knight | Pawn deriving Eq
 data Color  = Black | White deriving (Eq, Show)
@@ -10,7 +11,9 @@ type Position = (Int, Int)
 type Move     = (Position, Position)
 
 main :: IO ()
-main = loopBoard mkBoard White
+main = do
+         gen <- getStdGen
+         loopBoard gen mkBoard White
 
 mkBoard :: Board
 mkBoard = [mkMixedRow White,
@@ -179,15 +182,17 @@ setPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\
 removePiece :: Board -> Position -> (Board, CPiece)
 removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> Null))
 
-respondBoard :: Board -> Color -> Maybe Board
-respondBoard board color = case genMove board color of
-                             Just m  -> advanceBoard board m color
-                             Nothing -> Nothing
+respondBoard :: StdGen -> Board -> Color -> (StdGen, Maybe Board)
+respondBoard gen board color = let (newGen, maybeMove) = genMove gen board color in
+                                 case maybeMove of
+                                   Just m -> (newGen, advanceBoard board m color)
+                                   Nothing -> (newGen, Nothing)
 
-genMove :: Board -> Color -> Maybe Move
-genMove board color = case concat $ map (\position -> genPossibleMovesPiece board position) (genPositions board color) of
-                        []  -> Nothing
-                        m:_ -> Just m
+genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
+genMove gen board color = case concat $ map (\position -> genPossibleMovesPiece board position) (genPositions board color) of
+                        [] -> (gen, Nothing)
+                        ms -> let (i, newGen) = randomR (1, length ms) gen in
+                                (newGen, Just (ms !! (i-1)))
 
 genPositions :: Board -> Color -> [Position]
 genPositions board color = foldl (\ps p -> case getPiece board p of
@@ -199,15 +204,16 @@ genPossibleMovesPiece board position = case getPiece board position of
                                          CP color _ -> filter (\move -> validMove board move color) (map (\pos -> (position, pos)) mkCoords)
                                          _          -> []
 
-loopBoard :: Board -> Color -> IO ()
-loopBoard board color = forever $ do
+loopBoard :: StdGen -> Board -> Color -> IO ()
+loopBoard gen board color = forever $ do
                           putStrLn $ printBoard board True
                           putStrLn $ "Please enter your move (" ++ show color ++ "): "
                           moveStr <- getLine
                           case parseMove moveStr of
                             Just move -> case advanceBoard board move color of
-                                           Just advancedBoard -> case respondBoard advancedBoard $ swapColor color of
-                                                                   Just respondedBoard -> loopBoard respondedBoard color
-                                                                   Nothing -> putStrLn $ "ERROR: Program has made an invalid move"
+                                           Just advancedBoard -> let (newGen, maybeBoard) = respondBoard gen advancedBoard $ swapColor color in
+                                                                   case maybeBoard of
+                                                                     Just respondedBoard -> loopBoard newGen respondedBoard color
+                                                                     Nothing -> putStrLn $ "ERROR: Program has made an invalid move"
                                            Nothing -> putStrLn $ "ERROR: Invalid move: " ++ moveStr
                             Nothing -> putStrLn $ "ERROR: Invalid move string: " ++ moveStr
