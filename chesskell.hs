@@ -217,7 +217,7 @@ compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
 compareMove maximising (s1,_) (s2,_) = if maximising then compare s1 s2 else compare s2 s1
 
 genMoves :: Board -> Color -> [Move]
-genMoves board color = concat $ map (\position -> genPossibleMovesPiece board position) (genPositions board color)
+genMoves board color = concat $ map (genPossibleMovesPiece board) (genPositions board color)
 
 genPositions :: Board -> Color -> [Position]
 genPositions board color = foldl (\ps p -> case getPiece board p of
