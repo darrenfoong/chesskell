@@ -205,10 +205,14 @@ respondBoard gen board color = let (newGen, maybeMove) = genMove gen board color
                                    Nothing -> (newGen, Nothing)
 
 genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
-genMove gen board color = case concat $ map (\position -> genPossibleMovesPiece board position) (genPositions board color) of
+genMove gen board color = case genMoves board color of
                         [] -> (gen, Nothing)
                         ms -> let (i, newGen) = randomR (1, length ms) gen in
                                 (newGen, Just (ms !! (i-1)))
+
+
+genMoves :: Board -> Color -> [Move]
+genMoves board color = concat $ map (\position -> genPossibleMovesPiece board position) (genPositions board color)
 
 genPositions :: Board -> Color -> [Position]
 genPositions board color = foldl (\ps p -> case getPiece board p of
