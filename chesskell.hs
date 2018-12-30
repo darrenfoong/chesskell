@@ -206,16 +206,15 @@ respondBoard gen board color = let (newGen, maybeMove) = genMove gen board color
                                    Nothing -> (newGen, Nothing)
 
 genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
-genMove gen board color = case genMoves board color of
-                        [] -> (gen, Nothing)
-                        ms -> let (i, newGen) = randomR (1, length ms) gen in
-                                (newGen, Just (ms !! (i-1)))
+genMove gen board color = let (_,m) = minimax board color color 3 True in
+                            (gen, Just m)
 
-minimax :: Board -> Color -> Int -> (Int, Move)
-minimax board color 1 = maximumBy compareMove $ map (\m -> (scoreBoard color board, m)) $ genMoves board color
-                        where compareMove (s1,_) (s2,_) = compare s1 s2
-minimax board color n = maximumBy compareMove $ map (\m -> minimax board color (n-1)) $ genMoves board color
-                        where compareMove (s1,_) (s2,_) = compare s1 s2
+minimax :: Board -> Color -> Color -> Int -> Bool -> (Int, Move)
+minimax board scoringColor playerColor 1 maximising = maximumBy (compareMove maximising) $ map (\m -> (scoreBoard scoringColor (movePiece board m), m)) $ genMoves board playerColor
+minimax board scoringColor playerColor n maximising = maximumBy (compareMove maximising) $ map (\m -> minimax (movePiece board m) scoringColor (swapColor playerColor) (n-1) (not maximising)) $ genMoves board playerColor
+
+compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
+compareMove maximising (s1,_) (s2,_) = if maximising then compare s1 s2 else compare s2 s1
 
 genMoves :: Board -> Color -> [Move]
 genMoves board color = concat $ map (\position -> genPossibleMovesPiece board position) (genPositions board color)
