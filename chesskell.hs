@@ -85,12 +85,12 @@ scoreColorPiece _ Null = 0
 scoreBoard :: Color -> Board -> Int
 scoreBoard color = sum . map (sum . map (scoreColorPiece color))
 
-makePosition :: (Char, Char) -> Position
-makePosition (c,n) = (ord c - ord 'a' + 1, digitToInt n)
+mkPos :: (Char, Char) -> Position
+mkPos (c,n) = (ord c - ord 'a' + 1, digitToInt n)
 
 parseMove :: String -> Maybe Move
-parseMove (sc:sr:ec:er:_) = let start = makePosition (sc,sr)
-                                end = makePosition (ec,er) in
+parseMove (sc:sr:ec:er:_) = let start = mkPos (sc,sr)
+                                end = mkPos (ec,er) in
                                 if validPos start && validPos end
                                 then Just (start, end)
                                 else Nothing
@@ -142,8 +142,8 @@ checkLineOfSight _     Null          _                 = False
 checkLineOfSight _     (CP _ King)   _                 = True
 checkLineOfSight board (CP color Queen) move           = checkLineOfSight board (CP color Rook) move ||
                                                          checkLineOfSight board (CP color Bishop) move
-checkLineOfSight board (CP _ Rook)   (start, end)      = checkLineOfSightPos board (mkPos start end)
-checkLineOfSight board (CP _ Bishop) (start, end)      = checkLineOfSightPos board (mkPos start end)
+checkLineOfSight board (CP _ Rook)   (start, end)      = checkLineOfSightPos board (mkPositions start end)
+checkLineOfSight board (CP _ Bishop) (start, end)      = checkLineOfSightPos board (mkPositions start end)
 checkLineOfSight _     (CP _ Knight) _                 = True
 checkLineOfSight board (CP _ Pawn)   ((sc,sr), (_,er))
   | (er-sr) == 2  = checkLineOfSightPos board [(sc,sr+1)]
@@ -156,10 +156,10 @@ compareToInt a b
   | a < b     = 1
   | otherwise = 0
 
-mkPos :: Position -> Position -> [Position]
-mkPos (sc,sr) (ec,er) = let cdelta = compareToInt sc ec
-                            rdelta = compareToInt sr er in
-                          [(c,r) | c <- [sc,sc+cdelta..ec], r <- [sr,sr+rdelta..er]]
+mkPositions :: Position -> Position -> [Position]
+mkPositions (sc,sr) (ec,er) = let cdelta = compareToInt sc ec
+                                  rdelta = compareToInt sr er in
+                                [(c,r) | c <- [sc,sc+cdelta..ec], r <- [sr,sr+rdelta..er]]
 
 checkLineOfSightPos :: Board -> [Position] -> Bool
 checkLineOfSightPos _     []     = True
