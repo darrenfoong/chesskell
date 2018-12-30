@@ -1,4 +1,5 @@
 import Data.Char
+import Data.List
 import Control.Monad
 import System.Random
 
@@ -210,6 +211,11 @@ genMove gen board color = case genMoves board color of
                         ms -> let (i, newGen) = randomR (1, length ms) gen in
                                 (newGen, Just (ms !! (i-1)))
 
+minimax :: Board -> Color -> Int -> (Int, Move)
+minimax board color 1 = maximumBy compareMove $ map (\m -> (scoreBoard color board, m)) $ genMoves board color
+                        where compareMove (s1,_) (s2,_) = compare s1 s2
+minimax board color n = maximumBy compareMove $ map (\m -> minimax board color (n-1)) $ genMoves board color
+                        where compareMove (s1,_) (s2,_) = compare s1 s2
 
 genMoves :: Board -> Color -> [Move]
 genMoves board color = concat $ map (\position -> genPossibleMovesPiece board position) (genPositions board color)
