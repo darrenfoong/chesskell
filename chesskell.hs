@@ -86,7 +86,7 @@ scoreBoard :: Color -> Board -> Int
 scoreBoard color = sum . map (sum . map (scoreColorPiece color))
 
 mkPos :: (Char, Char) -> Position
-mkPos (c,n) = (ord c - ord 'a' + 1, digitToInt n)
+mkPos (c,r) = (ord c - ord 'a' + 1, digitToInt r)
 
 parseMove :: String -> Maybe Move
 parseMove (sc:sr:ec:er:_) = let start = mkPos (sc,sr)
