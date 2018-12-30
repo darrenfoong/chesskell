@@ -211,7 +211,7 @@ genMove gen board color = let (_,m) = minimax board color color 3 True in
 
 minimax :: Board -> Color -> Color -> Int -> Bool -> (Int, Move)
 minimax board scoringColor playerColor 1 maximising = maximumBy (compareMove maximising) $ map (\m -> (scoreBoard scoringColor (movePiece board m), m)) $ genMoves board playerColor
-minimax board scoringColor playerColor n maximising = maximumBy (compareMove maximising) $ map (\m -> minimax (movePiece board m) scoringColor (swapColor playerColor) (n-1) (not maximising)) $ genMoves board playerColor
+minimax board scoringColor playerColor n maximising = maximumBy (compareMove maximising) $ map (\m -> let (s,_) = minimax (movePiece board m) scoringColor (swapColor playerColor) (n-1) (not maximising) in (s,m)) $ genMoves board playerColor
 
 compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
 compareMove maximising (s1,_) (s2,_) = if maximising then compare s1 s2 else compare s2 s1
