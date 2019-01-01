@@ -88,13 +88,13 @@ scoreBoard color = sum . map (sum . map (scoreColorPiece color))
 mkPos :: (Char, Char) -> Position
 mkPos (c,r) = (ord c - ord 'a' + 1, digitToInt r)
 
-parseMove :: String -> Maybe Move
-parseMove (sc:sr:ec:er:_) = let start = mkPos (sc,sr)
-                                end = mkPos (ec,er) in
+parseMove :: String -> Either String Move
+parseMove moveStr@(sc:sr:ec:er:_) = let start = mkPos (sc,sr)
+                                        end = mkPos (ec,er) in
                                 if validPos start && validPos end
-                                then Just (start, end)
-                                else Nothing
-parseMove _ = Nothing
+                                then Right (start, end)
+                                else Left $ "ERROR: Invalid move string: " ++ moveStr
+parseMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
 
 swapColor :: Color -> Color
 swapColor Black = White
@@ -167,10 +167,10 @@ checkLineOfSightPos board (p:ps) = case getPiece board p of
                                      Null -> checkLineOfSightPos board ps
                                      _    -> False
 
-advanceBoard :: Board -> Move -> Color -> Maybe Board
+advanceBoard :: Board -> Move -> Color -> Either String Board
 advanceBoard board move color = if validMove board move color
-                                then Just (movePiece board move)
-                                else Nothing
+                                then Right $ movePiece board move
+                                else Left $ "ERROR: Invalid move: x"
 
 movePiece :: Board -> Move -> Board
 movePiece board (start, end) = let (intermediateBoard, oldPiece) = removePiece board start in
@@ -199,11 +199,11 @@ setPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\
 removePiece :: Board -> Position -> (Board, CPiece)
 removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> Null))
 
-respondBoard :: StdGen -> Board -> Color -> (StdGen, Maybe Board)
+respondBoard :: StdGen -> Board -> Color -> (StdGen, Either String Board)
 respondBoard gen board color = let (newGen, maybeMove) = genMove gen board color in
                                  case maybeMove of
                                    Just m -> (newGen, advanceBoard board m color)
-                                   Nothing -> (newGen, Nothing)
+                                   Nothing -> (newGen, Left $ "ERROR: Program has made an invalid move")
 
 genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove gen board color = let (_,m) = minimax board color color 3 True in
@@ -234,11 +234,15 @@ loopBoard gen board color = forever $ do
                           putStrLn $ printBoard board True
                           putStrLn $ "Please enter your move (" ++ show color ++ "): "
                           moveStr <- getLine
-                          case parseMove moveStr of
-                            Just move -> case advanceBoard board move color of
-                                           Just advancedBoard -> let (newGen, maybeBoard) = respondBoard gen advancedBoard $ swapColor color in
-                                                                   case maybeBoard of
-                                                                     Just respondedBoard -> loopBoard newGen respondedBoard color
-                                                                     Nothing -> putStrLn $ "ERROR: Program has made an invalid move"
-                                           Nothing -> putStrLn $ "ERROR: Invalid move: " ++ moveStr
-                            Nothing -> putStrLn $ "ERROR: Invalid move string: " ++ moveStr
+                          case loopBoardInner gen board color moveStr of
+                            Left err -> putStrLn $ err
+                            Right (newGen, respondedBoard) -> loopBoard newGen respondedBoard color
+
+loopBoardInner :: StdGen -> Board -> Color -> String -> Either String (StdGen, Board)
+loopBoardInner gen board color moveStr = do
+                            move <- parseMove moveStr
+                            advancedBoard <- advanceBoard board move color
+                            let (newGen, maybeBoard) = respondBoard gen advancedBoard $ swapColor color in
+                              do
+                                respondedBoard <- maybeBoard
+                                return (newGen, respondedBoard)
