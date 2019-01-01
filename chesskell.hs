@@ -170,7 +170,7 @@ checkLineOfSightPos board (p:ps) = case getPiece board p of
 advanceBoard :: Board -> Move -> Color -> Either String Board
 advanceBoard board move color = if validMove board move color
                                 then Right $ movePiece board move
-                                else Left $ "ERROR: Invalid move: x"
+                                else Left $ "ERROR: Invalid move: " ++ (show move)
 
 movePiece :: Board -> Move -> Board
 movePiece board (start, end) = let (intermediateBoard, oldPiece) = removePiece board start in
