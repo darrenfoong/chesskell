@@ -10,6 +10,7 @@ extra-source-files:  CHANGELOG.md
 cabal-version:       >=1.10
 
 executable chesskell
+  hs-source-dirs:      src
   main-is:             Main.hs
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base >=4.12 && <4.13,
