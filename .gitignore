@@ -1,4 +1,1 @@
-chesskell
-*.hi
-*.o
-Makefile
+dist*
