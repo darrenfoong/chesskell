@@ -130,8 +130,8 @@ validMovePiece (CP _ Rook)     _     ((sc,sr), (ec,er)) = ec == sc || er == sr
 validMovePiece (CP _ Bishop)   _     ((sc,sr), (ec,er)) = abs(ec-sc) == abs(er-sr)
 validMovePiece (CP _ Knight)   _     ((sc,sr), (ec,er)) = let cdiff = (ec-sc)
                                                               rdiff = (er-sr) in
-                                                              (abs(cdiff) == 1 && abs(rdiff) == 2) ||
-                                                              (abs(cdiff) == 2 && abs(rdiff) == 1)
+                                                              (abs cdiff == 1 && abs rdiff == 2) ||
+                                                              (abs cdiff == 2 && abs rdiff == 1)
 validMovePiece (CP Black Pawn) True  ((sc,sr), (ec,er)) = abs(ec-sc) == 1 && (er-sr) == (-1)
 validMovePiece (CP White Pawn) True  ((sc,sr), (ec,er)) = abs(ec-sc) == 1 && (er-sr) == 1
 validMovePiece (CP Black Pawn) False ((sc,sr), (ec,er)) = ec == sc && ((er-sr) == (-1) || (sr == 7 && (er-sr) == (-2)))
@@ -170,7 +170,7 @@ checkLineOfSightPos board (p:ps) = case getPiece board p of
 advanceBoard :: Board -> Move -> Color -> Either String Board
 advanceBoard board move color = if validMove board move color
                                 then Right $ movePiece board move
-                                else Left $ "ERROR: Invalid move: " ++ (show move)
+                                else Left $ "ERROR: Invalid move: " ++ show move
 
 movePiece :: Board -> Move -> Board
 movePiece board (start, end) = let (intermediateBoard, oldPiece) = removePiece board start in
@@ -179,13 +179,13 @@ movePiece board (start, end) = let (intermediateBoard, oldPiece) = removePiece b
 alterBoardRow :: Board -> Int -> ([CPiece] -> ([CPiece], CPiece)) -> (Board, CPiece)
 alterBoardRow []     _ _ = ([], Null)
 alterBoardRow (r:rs) 1 f = let (alteredRow, oldPiece) = f r in
-                             ((alteredRow:rs), oldPiece)
+                             (alteredRow:rs, oldPiece)
 alterBoardRow (r:rs) n f = let (alteredBoard, oldPiece) = alterBoardRow rs (n-1) f in
                              (r:alteredBoard, oldPiece)
 
 alterRow :: [CPiece] -> Int -> (CPiece -> CPiece) -> ([CPiece], CPiece)
 alterRow []     _ _ = ([], Null)
-alterRow (p:ps) 1 f = ((f p):ps, p)
+alterRow (p:ps) 1 f = (f p : ps, p)
 alterRow (p:ps) n f = let (alteredRow, oldPiece) = alterRow ps (n-1) f in
                         (p:alteredRow, oldPiece)
 
@@ -193,17 +193,17 @@ getPiece :: Board -> Position -> CPiece
 getPiece board (cn,rn) = board !! (rn-1) !! (cn-1)
 
 setPiece :: Board -> Position -> CPiece -> Board
-setPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> piece)) in
+setPiece board (cn,rn) piece = let (alteredBoard, _) = alterBoardRow board rn (\r -> alterRow r cn (const piece)) in
                                  alteredBoard
 
 removePiece :: Board -> Position -> (Board, CPiece)
-removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (\_ -> Null))
+removePiece board (cn,rn) = alterBoardRow board rn (\r -> alterRow r cn (const Null))
 
 respondBoard :: StdGen -> Board -> Color -> (StdGen, Either String Board)
 respondBoard gen board color = let (newGen, maybeMove) = genMove gen board color in
                                  case maybeMove of
                                    Just m -> (newGen, advanceBoard board m color)
-                                   Nothing -> (newGen, Left $ "ERROR: Program has made an invalid move")
+                                   Nothing -> (newGen, Left "ERROR: Program has made an invalid move")
 
 genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove gen board color = let (_,m) = minimax board color color 3 True in
@@ -217,7 +217,7 @@ compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
 compareMove maximising (s1,_) (s2,_) = if maximising then compare s1 s2 else compare s2 s1
 
 genMoves :: Board -> Color -> [Move]
-genMoves board color = concat $ map (genPossibleMovesPiece board) (genPositions board color)
+genMoves board color = concatMap (genPossibleMovesPiece board) (genPositions board color)
 
 genPositions :: Board -> Color -> [Position]
 genPositions board color = foldl (\ps p -> case getPiece board p of
@@ -235,7 +235,7 @@ loopBoard gen board color = forever $ do
                           putStrLn $ "Please enter your move (" ++ show color ++ "): "
                           moveStr <- getLine
                           case loopBoardInner gen board color moveStr of
-                            Left err -> putStrLn $ err
+                            Left err -> putStrLn err
                             Right (newGen, respondedBoard) -> loopBoard newGen respondedBoard color
 
 loopBoardInner :: StdGen -> Board -> Color -> String -> Either String (StdGen, Board)
