@@ -1,8 +1,6 @@
 name:                chesskell
 version:             0.1.0.0
 description:         Chess in Haskell
--- license:
--- license-file:        LICENSE
 author:              Darren Foong
 maintainer:          darrenfoong@gmail.com
 build-type:          Simple
