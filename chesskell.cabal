@@ -4,7 +4,6 @@ description:         Chess in Haskell
 author:              Darren Foong
 maintainer:          darrenfoong@gmail.com
 build-type:          Simple
-extra-source-files:  CHANGELOG.md
 cabal-version:       >=1.10
 
 executable chesskell
