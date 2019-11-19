@@ -3,13 +3,7 @@ import Data.List
 import Control.Monad
 import System.Random
 
-data Piece  = King | Queen | Rook | Bishop | Knight | Pawn deriving Eq
-data Color  = Black | White deriving (Eq, Show)
-data CPiece = CP Color Piece | Null
-
-type Board    = [[CPiece]]
-type Position = (Int, Int)
-type Move     = (Position, Position)
+import Common (Piece(..), Color(..), CPiece(..), Board, Position, Move)
 
 main :: IO ()
 main = do

@@ -9,6 +9,7 @@ cabal-version:       >=1.10
 executable chesskell
   hs-source-dirs:      src
   main-is:             Main.hs
+  other-modules:       Common
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base >=4.12 && <4.13,
                        random
