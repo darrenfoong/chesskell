@@ -3,8 +3,8 @@ module Board
   mkBoard,
   mkPos,
   mkCoords,
-  scoreBoard,
-  printBoard
+  printBoard,
+  scoreBoard
 ) where
 
 import Data.Char
@@ -37,6 +37,9 @@ mkPawnRow color = replicate 8 (CP color Pawn)
 mkBlankRow :: [CPiece]
 mkBlankRow = replicate 8 Null
 
+mkPos :: (Char, Char) -> Position
+mkPos (c,r) = (ord c - ord 'a' + 1, digitToInt r)
+
 mkCoords :: [Position]
 mkCoords = [(c,r) | c <- [1..8], r <- [1..8]]
 
@@ -64,6 +67,13 @@ printPiece (CP White Knight) = "n"
 printPiece (CP White Pawn)   = "p"
 printPiece Null              = "#"
 
+scoreBoard :: Color -> Board -> Int
+scoreBoard color = sum . map (sum . map (scoreColorPiece color))
+
+scoreColorPiece :: Color -> CPiece -> Int
+scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
+scoreColorPiece _ Null = 0
+
 scorePiece :: CPiece -> Int
 scorePiece (CP _ King)   = 0
 scorePiece (CP _ Queen)  = 9
@@ -72,13 +82,3 @@ scorePiece (CP _ Bishop) = 3
 scorePiece (CP _ Knight) = 3
 scorePiece (CP _ Pawn)   = 1
 scorePiece Null          = 0
-
-scoreColorPiece :: Color -> CPiece -> Int
-scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
-scoreColorPiece _ Null = 0
-
-scoreBoard :: Color -> Board -> Int
-scoreBoard color = sum . map (sum . map (scoreColorPiece color))
-
-mkPos :: (Char, Char) -> Position
-mkPos (c,r) = (ord c - ord 'a' + 1, digitToInt r)

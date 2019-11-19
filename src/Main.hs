@@ -3,7 +3,7 @@ import Control.Monad
 import System.Random
 
 import Types (Piece(..), Color(..), CPiece(..), Board, Position, Move, swapColor)
-import Board (mkBoard, mkPos, mkCoords, scoreBoard, printBoard)
+import Board (mkBoard, mkPos, mkCoords, printBoard, scoreBoard)
 
 main :: IO ()
 main = do
