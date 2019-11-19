@@ -3,7 +3,7 @@ import Data.List
 import Control.Monad
 import System.Random
 
-import Common (Piece(..), Color(..), CPiece(..), Board, Position, Move)
+import Types (Piece(..), Color(..), CPiece(..), Board, Position, Move)
 
 main :: IO ()
 main = do

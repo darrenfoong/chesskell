@@ -1,4 +1,4 @@
-module Common
+module Types
 (
   Piece(..),
   Color(..),
