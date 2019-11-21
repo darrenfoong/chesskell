@@ -11,6 +11,8 @@ executable chesskell
   main-is:             Main.hs
   other-modules:       Types,
                        Board,
+                       Position,
+                       Move,
                        Logic
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base >=4.12 && <4.13,
