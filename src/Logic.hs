@@ -6,7 +6,7 @@ module Logic
 import Data.List
 import System.Random
 
-import Types (Piece(..), Color(..), CPiece(..), Board, Position, Move, mkPositions, swapColor)
+import Types (Color(..), CPiece(..), Board, Position, Move, swapColor)
 import Board (scoreBoard, advanceBoard, movePiece, getPiece, mkCoords, validMove)
 
 respondBoard :: StdGen -> Board -> Color -> (StdGen, Either String Board)

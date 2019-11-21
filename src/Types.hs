@@ -7,7 +7,6 @@ module Types
   Position,
   Move,
   swapColor,
-  compareToInt,
   mkPositions
 ) where
 

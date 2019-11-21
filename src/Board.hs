@@ -9,7 +9,6 @@ module Board
   parseMove,
   movePiece,
   getPiece,
-  mkCoords,
   validMove
 ) where
 
