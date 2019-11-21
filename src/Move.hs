@@ -4,8 +4,8 @@ module Move
   validMovePiece
 ) where
 
-import Types (Piece(..), Color(..), CPiece(..), Board, Position, Move, mkPositions)
-import Position (mkPos, validPos)
+import Types (Piece(..), Color(..), CPiece(..), Board, Position, Move)
+import Position (mkPos, mkPositions, validPos)
 
 parseMove :: String -> Either String Move
 parseMove moveStr@(sc:sr:ec:er:_) = let start = mkPos (sc,sr)

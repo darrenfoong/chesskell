@@ -12,8 +12,8 @@ module Board
   validMove
 ) where
 
-import Types (Piece(..), Color(..), CPiece(..), Board, Position, Move, mkPositions)
-import Position (mkPos)
+import Types (Piece(..), Color(..), CPiece(..), Board, Position, Move)
+import Position (mkPos, mkPositions)
 import Move (parseMove, validMovePiece)
 
 mkBoard :: Board
