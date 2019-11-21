@@ -10,7 +10,8 @@ executable chesskell
   hs-source-dirs:      src
   main-is:             Main.hs
   other-modules:       Types,
-                       Board
+                       Board,
+                       Logic
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base >=4.12 && <4.13,
                        random
