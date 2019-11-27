@@ -1,5 +1,3 @@
-module Main where
-
 import Test.Hspec
 
 import Types(Color(..), swapColor)
