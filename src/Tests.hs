@@ -2,6 +2,7 @@ import Test.Hspec
 
 import Types(Color(..), swapColor)
 
+{- HLINT ignore "Redundant do" -}
 main :: IO ()
 main = hspec $ do
 
