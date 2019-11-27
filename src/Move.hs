@@ -16,13 +16,13 @@ parseMove moveStr@(sc:sr:ec:er:_) = let start = mkPos (sc,sr)
 parseMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
 
 validMovePiece :: CPiece -> Bool -> Move -> Bool
-validMovePiece (CP Black Pawn) False ((sc,sr), (ec,er)) = let cdiff = ec-sc
-                                                              rdiff = er-sr
-                                                          in  cdiff == 0 && (rdiff == (-1) || (sr == 7 && rdiff == (-2)))
-validMovePiece (CP White Pawn) False ((sc,sr), (ec,er)) = let cdiff = ec-sc
-                                                              rdiff = er-sr
-                                                          in  cdiff == 0 && (rdiff == 1 || (sr == 2 && rdiff == 2))
-validMovePiece piece attack ((sc,sr), (ec,er)) = validMovePieceInner piece attack (ec-sc, er-sr)
+validMovePiece (CP Black Pawn) False  ((sc,sr), (ec,er)) = let cdiff = ec-sc
+                                                               rdiff = er-sr
+                                                           in  cdiff == 0 && (rdiff == (-1) || (sr == 7 && rdiff == (-2)))
+validMovePiece (CP White Pawn) False  ((sc,sr), (ec,er)) = let cdiff = ec-sc
+                                                               rdiff = er-sr
+                                                           in  cdiff == 0 && (rdiff == 1 || (sr == 2 && rdiff == 2))
+validMovePiece piece           attack ((sc,sr), (ec,er)) = validMovePieceInner piece attack (ec-sc, er-sr)
 
 validMovePieceInner :: CPiece -> Bool -> (Int, Int) -> Bool
 validMovePieceInner (CP _ King)     _     (cdiff, rdiff) = (cdiff == 0 && abs rdiff == 1) ||
