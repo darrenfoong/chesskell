@@ -1,10 +1,12 @@
+module TypesSpec where
+
 import Test.Hspec
 
 import Types(Color(..), swapColor)
 
 {- HLINT ignore "Redundant do" -}
-main :: IO ()
-main = hspec $ do
+spec :: Spec
+spec = do
 
   describe "Validate swapColor" $ do
 
