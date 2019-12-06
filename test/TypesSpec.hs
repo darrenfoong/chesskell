@@ -8,10 +8,10 @@ import Types(Color(..), swapColor)
 spec :: Spec
 spec = do
 
-  describe "Validate swapColor" $ do
+  describe "swapColor" $ do
 
-    it "swapColor is supposed to swap black" $ do
+    it "swaps Black to White" $ do
       swapColor Black `shouldBe` White
 
-    it "swapColor is supposed to swap white" $ do
+    it "swaps White to Black" $ do
       swapColor White `shouldBe` Black
