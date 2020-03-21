@@ -16,7 +16,7 @@ spec = do
   describe "validPos" $ do
 
     it "marks (1, 1) as valid" $ do
-      validPos (1, 1) `shouldBe` True
+      (1, 1) `shouldSatisfy` validPos
 
     it "marks (9, 14) as invalid" $ do
-      validPos (9, 14) `shouldBe` False
+      (9, 14) `shouldNotSatisfy` validPos
