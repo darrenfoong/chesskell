@@ -10,5 +10,5 @@ stack build
 
 ```
 stack run chesskell     # command line UI
-stack run chesskell-web # web UI
+stack run chesskell-web # web UI at localhost:3000
 ```
