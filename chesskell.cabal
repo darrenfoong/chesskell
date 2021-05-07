@@ -19,6 +19,25 @@ executable chesskell
                        random
   default-language:    Haskell2010
 
+executable chesskell-web
+  hs-source-dirs:      src
+  main-is:             Main.hs
+  other-modules:       Types,
+                       Board,
+                       Position,
+                       Move,
+                       Logic
+  ghc-options:         -Wall -Wincomplete-uni-patterns
+  build-depends:       base,
+                       random,
+                       yesod,
+                       yesod-form,
+                       yesod-persistent,
+                       text,
+                       resourcet,
+                       monad-logger
+  default-language:    Haskell2010
+
 library
   hs-source-dirs:      src
   exposed-modules:     Types,

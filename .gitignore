@@ -2,3 +2,5 @@ dist*
 cabal.*
 .ghc.*
 .stack-work
+.idea
+*.iml
