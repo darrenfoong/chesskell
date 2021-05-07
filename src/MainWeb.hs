@@ -45,10 +45,15 @@ appLayout widget = do
           |]
 
 getHomeR = defaultLayout $ do
+        let ns = [1..8]
         setTitle "addki"
         toWidget [hamlet|<h1>chesskell|]
         toWidget [hamlet|
-        <p>Test
+          <table>
+            $forall i <- ns
+              <tr>
+              $forall j <- ns
+                <td>(#{i}, #{j})
         |]
 
 
