@@ -1,5 +1,12 @@
 # chesskell
 
+## Formatting
+
+```
+ormolu --mode inplace $(find . -name '*.hs')
+hlint .
+```
+
 ## Building
 
 ```
