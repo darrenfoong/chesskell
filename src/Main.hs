@@ -22,7 +22,7 @@ loopBoardInner :: StdGen -> Board -> Color -> String -> Either String (StdGen, B
 loopBoardInner gen board color moveStr = do
   move <- parseMove moveStr
   advancedBoard <- advanceBoard board move color
-  let (newGen, maybeBoard) = respondBoard gen advancedBoard $ swapColor color
+  let (newGen, mBoard) = respondBoard gen advancedBoard $ swapColor color
    in do
-        respondedBoard <- maybeBoard
+        respondedBoard <- mBoard
         return (newGen, respondedBoard)

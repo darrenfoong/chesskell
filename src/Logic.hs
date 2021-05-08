@@ -10,8 +10,8 @@ import Types (Board, CPiece (..), Color (..), Move, Position, swapColor)
 
 respondBoard :: StdGen -> Board -> Color -> (StdGen, Either String Board)
 respondBoard gen board color =
-  let (newGen, maybeMove) = genMove gen board color
-   in case maybeMove of
+  let (newGen, mMove) = genMove gen board color
+   in case mMove of
         Just m -> (newGen, advanceBoard board m color)
         Nothing -> (newGen, Left "ERROR: Program has made an invalid move")
 
