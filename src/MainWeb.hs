@@ -17,9 +17,9 @@ data App = App
 mkYesod
   "App"
   [parseRoutes|
-/ HomeR GET
-/oof NotFoundR GET
-|]
+    / HomeR GET
+    /oof NotFoundR GET
+  |]
 
 instance Yesod App where
   defaultLayout = appLayout
@@ -33,20 +33,20 @@ appLayout widget = do
     toWidgetHead [hamlet|<meta name="keywords" content="anki">|]
     toWidget
       [lucius|
-          body { font: 1.0rem/1.1 sans-serif; }
-          #content { padding: 10px; }
-          |]
+        body { font: 1.0rem/1.1 sans-serif; }
+        #content { padding: 10px; }
+      |]
   withUrlRenderer
     [hamlet|
-          $doctype 5
-          <html>
-            <head>
-              <title>#{pageTitle pc}
-              ^{pageHead pc}
-            <body>
-              <div #content>
-                ^{pageBody pc}
-          |]
+      $doctype 5
+      <html>
+        <head>
+          <title>#{pageTitle pc}
+          ^{pageHead pc}
+        <body>
+          <div #content>
+            ^{pageBody pc}
+    |]
 
 getHomeR = do
   let rs = map (\i -> chr (i + ord 'a' - 1)) [1 .. 8]
@@ -64,10 +64,9 @@ getHomeR = do
 getNotFoundR = defaultLayout $ do
   setTitle "Not found"
   toWidget [hamlet|<h1>Oof!|]
-  toWidget
-    [hamlet|
+  [whamlet|
     <p>We couldn't find your page
-    |]
+  |]
 
 main :: IO ()
 main = warp 3000 App
