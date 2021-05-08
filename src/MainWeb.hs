@@ -6,13 +6,15 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
-import Board (getPiece, mkBoard, parseMove)
+import Board (advanceBoard, getPiece, mkBoard, parseMove)
 import Control.Applicative ((<$>), (<*>))
 import Data.Char
 import Data.Maybe
-import Data.Text (Text, pack)
+import Data.Text (Text, append, pack, unpack)
+import Logic (genMove, respondBoard)
+import System.IO.Unsafe (unsafePerformIO)
 import System.Random
-import Types (CPiece (..), Color (..), Piece (..))
+import Types (Board, CPiece (..), Color (..), Piece (..), swapColor)
 import Yesod
 import Yesod.Form
 
@@ -69,6 +71,15 @@ appLayout widget = do
             ^{pageBody pc}
     |]
 
+handleBoard :: StdGen -> Board -> Color -> String -> Either String String
+handleBoard gen board color moveStr = do
+  move <- parseMove moveStr
+  advancedBoard <- advanceBoard board move color
+  let (newGen, mMove) = genMove gen board color
+   in case mMove of
+        Just m -> Right (show mMove)
+        Nothing -> Left "ERROR: Program has made an invalid move"
+
 getHomeR = do
   mPosition <- lookupPostParam "position"
   mStart <- lookupPostParam "start"
@@ -83,23 +94,64 @@ getHomeR = do
 
   let mPreviousWhiteMove = case state of
         Start -> Nothing
-        PendingMoveStart -> Nothing
-        PendingMoveEnd -> do
+        PendingMoveStart -> do
           start <- mStart
           end <- mPosition
-          return (show start ++ show end)
+          return $ unpack $ append start end
+        PendingMoveEnd -> Nothing
 
-  let gen = getStdGen
+  let gen = unsafePerformIO getStdGen -- TODO Fix this
   let board = mkBoard
+  let color = White
 
-  --  let move = case mPreviousWhiteMove of
-  --                Just previousWhiteMove -> parseMove previousWhiteMove
-  --                Nothing -> Left "nah"
+  -- TODO Board serdes
 
-  let mPreviousBlackMove = Just "e5e5"
-
+  let mPreviousBlackMove = case state of
+        Start -> Nothing
+        PendingMoveStart -> case mPreviousWhiteMove of
+          Just previousWhiteMove -> case handleBoard gen board color previousWhiteMove of
+            Left blackMove -> Just blackMove
+            Right error -> Just error -- TODO Fix this
+          Nothing -> Nothing
+        PendingMoveEnd -> Just "TODO" -- TODO Carry over from previous state
   defaultLayout $ do
     setTitle "chesskell"
+    toWidget
+      [lucius|
+        #board div.row {
+          clear: both
+        }
+
+        #board div.column {
+          float: left;
+        }
+
+        #board div:nth-child(even) div:nth-child(odd) button, 
+        #board div:nth-child(odd) div:nth-child(even) button {
+          background-color: #ccc;
+        }
+        
+        #board div:nth-child(even) div:nth-child(odd) button:hover, 
+        #board div:nth-child(odd) div:nth-child(even) button:hover {
+          background-color: #aaa;
+        }
+        
+        #board button:hover {
+          background-color: #aaa;
+        }
+
+        #board button {
+          margin: 0;
+          padding: 0;
+          border: 1px solid #000;
+          width: 50px;
+          height: 50px;
+          background-color: #fff;
+          color: #000;
+          font-size: 2.2em;
+          text-align: center;
+        }
+      |]
     [whamlet|
       <p>You are White.
       $if state /= Start
@@ -112,19 +164,20 @@ getHomeR = do
         $maybe position <- mPosition
           <p>You selected <span>#{position}</span>. Please select where the piece should go.
     |]
-    let rs = [1 .. 8]
-    let cs = reverse [1 .. 8]
-    let rconv = \i -> chr (i + ord 'a' - 1)
+    let cs = [1 .. 8]
+    let cconv = \i -> chr (i + ord 'a' - 1)
+    let rs = reverse [1 .. 8]
     [whamlet|
       <form method="post" action=@{HomeR}>
         $if state == PendingMoveEnd
           $maybe position <- mPosition
             <input type="hidden" name="start" value="#{position}">
-        <table>
+        <div id="board">
           $forall r <- rs
-            <tr>
+            <div class="row">
               $forall c <- cs
-                <td><button name="position" value="#{rconv r}#{c}">#{prettyPrintPiece $ getPiece board (c, r)}
+                <div class="column">
+                  <button name="position" title="#{cconv c}#{r}" value="#{cconv c}#{r}">#{prettyPrintPiece $ getPiece board (c, r)}
     |]
 
 postHomeR = getHomeR

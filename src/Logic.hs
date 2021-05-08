@@ -1,5 +1,6 @@
 module Logic
-  ( respondBoard,
+  ( genMove,
+    respondBoard,
   )
 where
 
