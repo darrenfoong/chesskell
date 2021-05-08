@@ -48,30 +48,18 @@ appLayout widget = do
                 ^{pageBody pc}
           |]
 
-chessboardForm :: Html -> MForm Handler (FormResult (Maybe Text), Widget)
-chessboardForm extra = do
-  let rs = map (\i -> chr (i + ord 'a' - 1)) [8 .. 1]
-  let cs = [1 .. 8]
-  return
-    ( FormSuccess Nothing,
-      [whamlet| 
-        <table>
-          $forall r <- rs
-            <tr>
-            $forall c <- cs
-              <td><input type=submit value="#{r}#{c}">
-    |]
-    )
-
 getHomeR = do
-  ((res, widget), enctype) <- runFormGet chessboardForm
+  let rs = map (\i -> chr (i + ord 'a' - 1)) [1 .. 8]
+  let cs = reverse [1 .. 8]
   defaultLayout $ do
-    setTitle "addki"
-    toWidget [hamlet|<h1>chesskell|]
+    setTitle "chesskell"
     [whamlet|
-          <form method=post enctype=#{enctype}>
-            ^{widget}
-          |]
+      <table>
+        $forall r <- rs
+          <tr>
+          $forall c <- cs
+            <td><input type="submit" value="#{r}#{c}">
+    |]
 
 getNotFoundR = defaultLayout $ do
   setTitle "Not found"
