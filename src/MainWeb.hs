@@ -7,6 +7,7 @@
 {-# LANGUAGE ViewPatterns #-}
 
 import Control.Applicative ((<$>), (<*>))
+import Data.Char
 import Data.Text (Text, pack)
 import Yesod
 import Yesod.Form
@@ -49,10 +50,16 @@ appLayout widget = do
 
 chessboardForm :: Html -> MForm Handler (FormResult (Maybe Text), Widget)
 chessboardForm extra = do
+  let rs = map (\i -> chr (i + ord 'a' - 1)) [8 .. 1]
+  let cs = [1 .. 8]
   return
     ( FormSuccess Nothing,
       [whamlet| 
-        <input type=submit value="11">
+        <table>
+          $forall r <- rs
+            <tr>
+            $forall c <- cs
+              <td><input type=submit value="#{r}#{c}">
     |]
     )
 
