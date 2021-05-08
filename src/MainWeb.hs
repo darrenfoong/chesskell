@@ -17,7 +17,7 @@ data App = App
 mkYesod
   "App"
   [parseRoutes|
-    / HomeR GET
+    / HomeR GET POST
     /oof NotFoundR GET
   |]
 
@@ -51,15 +51,23 @@ appLayout widget = do
 getHomeR = do
   let rs = map (\i -> chr (i + ord 'a' - 1)) [1 .. 8]
   let cs = reverse [1 .. 8]
+  mPosition <- lookupPostParam "position"
   defaultLayout $ do
     setTitle "chesskell"
     [whamlet|
-      <table>
-        $forall r <- rs
-          <tr>
-          $forall c <- cs
-            <td><input type="submit" value="#{r}#{c}">
+      $maybe position <- mPosition
+        <p>#{position}
+      $nothing
+        <p>Welcome
+      <form method="post" action=@{HomeR}>
+        <table>
+          $forall r <- rs
+            <tr>
+              $forall c <- cs
+                <td><input type="submit" name="position" value="#{r}#{c}">
     |]
+
+postHomeR = getHomeR
 
 getNotFoundR = defaultLayout $ do
   setTitle "Not found"
