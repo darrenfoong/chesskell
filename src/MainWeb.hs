@@ -126,6 +126,22 @@ getHomeR = do
           float: left;
         }
 
+        #board div.row-label {
+          float: left;
+          width: 30px;
+          height: 50px;
+          line-height: 50px;
+          text-align: center;
+        }
+
+        #board div.column-label {
+          float: left;
+          width: 50px;
+          height: 30px;
+          line-height: 30px;
+          text-align: center;
+        }
+
         #board div:nth-child(even) div:nth-child(odd) button, 
         #board div:nth-child(odd) div:nth-child(even) button {
           background-color: #ccc;
@@ -148,7 +164,8 @@ getHomeR = do
           height: 50px;
           background-color: #fff;
           color: #000;
-          font-size: 2.2em;
+          font-size: 2.4rem;
+          line-height: 50px;
           text-align: center;
         }
       |]
@@ -175,9 +192,14 @@ getHomeR = do
         <div id="board">
           $forall r <- rs
             <div class="row">
+              <div class="row-label">#{r}
               $forall c <- cs
                 <div class="column">
                   <button name="position" title="#{cconv c}#{r}" value="#{cconv c}#{r}">#{prettyPrintPiece $ getPiece board (c, r)}
+          <div class="row">
+            <div class="row-label">
+            $forall c <- cs
+              <div class="column-label">#{cconv c}
     |]
 
 postHomeR = getHomeR
