@@ -58,7 +58,7 @@ appLayout widget = do
 getState :: Maybe Text -> Maybe Text -> State
 getState mStart mPosition
   | isNothing mStart && isNothing mPosition = Start
-  | isJust mStart && isNothing mPosition = PendingMoveStart
+  | isJust mStart && isJust mPosition = PendingMoveStart
   | otherwise = PendingMoveEnd
 
 getHomeR = do
