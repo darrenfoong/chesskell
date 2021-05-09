@@ -9,6 +9,8 @@ module Board
     movePiece,
     getPiece,
     validMove,
+    unprintPiece,
+    prettyPrintPiece,
   )
 where
 
@@ -74,6 +76,36 @@ printPiece (CP White Bishop) = "b"
 printPiece (CP White Knight) = "n"
 printPiece (CP White Pawn) = "p"
 printPiece Null = "#"
+
+unprintPiece :: String -> CPiece
+unprintPiece "K" = CP Black King
+unprintPiece "Q" = CP Black Queen
+unprintPiece "R" = CP Black Rook
+unprintPiece "B" = CP Black Bishop
+unprintPiece "N" = CP Black Knight
+unprintPiece "P" = CP Black Pawn
+unprintPiece "k" = CP Black King
+unprintPiece "q" = CP Black Queen
+unprintPiece "r" = CP Black Rook
+unprintPiece "b" = CP Black Bishop
+unprintPiece "n" = CP Black Knight
+unprintPiece "p" = CP Black Pawn
+unprintPiece _ = Null
+
+prettyPrintPiece :: CPiece -> String
+prettyPrintPiece (CP Black King) = "♚"
+prettyPrintPiece (CP Black Queen) = "♛"
+prettyPrintPiece (CP Black Rook) = "♜"
+prettyPrintPiece (CP Black Bishop) = "♝"
+prettyPrintPiece (CP Black Knight) = "♞"
+prettyPrintPiece (CP Black Pawn) = "♟︎"
+prettyPrintPiece (CP White King) = "♔"
+prettyPrintPiece (CP White Queen) = "♕"
+prettyPrintPiece (CP White Rook) = "♖"
+prettyPrintPiece (CP White Bishop) = "♗"
+prettyPrintPiece (CP White Knight) = "♘"
+prettyPrintPiece (CP White Pawn) = "♙"
+prettyPrintPiece Null = ""
 
 scoreBoard :: Color -> Board -> Int
 scoreBoard color = sum . map (sum . map (scoreColorPiece color))

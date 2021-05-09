@@ -6,12 +6,11 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
-import Board (advanceBoard, getPiece, mkBoard, printRow)
+import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, printBoard, printRow, unprintPiece)
 import Control.Applicative ((<$>), (<*>))
 import Data.Char
-import Data.List.Split (chunksOf)
 import Data.Maybe
-import Data.Text (Text, append, pack, unpack)
+import Data.Text (Text, append, chunksOf, pack, unpack)
 import Logic (genMove, respondBoard)
 import Move (parseMove)
 import System.IO.Unsafe (unsafePerformIO)
@@ -23,21 +22,6 @@ import Yesod.Form
 data App = App
 
 data State = Start | PendingMoveStart | PendingMoveEnd deriving (Eq, Show)
-
-prettyPrintPiece :: CPiece -> String
-prettyPrintPiece (CP Black King) = "♚"
-prettyPrintPiece (CP Black Queen) = "♛"
-prettyPrintPiece (CP Black Rook) = "♜"
-prettyPrintPiece (CP Black Bishop) = "♝"
-prettyPrintPiece (CP Black Knight) = "♞"
-prettyPrintPiece (CP Black Pawn) = "♟︎"
-prettyPrintPiece (CP White King) = "♔"
-prettyPrintPiece (CP White Queen) = "♕"
-prettyPrintPiece (CP White Rook) = "♖"
-prettyPrintPiece (CP White Bishop) = "♗"
-prettyPrintPiece (CP White Knight) = "♘"
-prettyPrintPiece (CP White Pawn) = "♙"
-prettyPrintPiece Types.Null = ""
 
 mkYesod
   "App"
@@ -74,10 +58,10 @@ appLayout widget = do
     |]
 
 readBoard :: String -> Either String Board
-readBoard boardStr = Right (map readRow $ chunksOf 8 boardStr)
+readBoard boardStr = Right (map readRow $ chunksOf 8 (pack boardStr))
 
-readRow :: String -> [CPiece]
-readRow rowStr = replicate 8 (CP White Pawn)
+readRow :: Text -> [CPiece]
+readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
 
 writeBoard :: Board -> String
 writeBoard = concatMap printRow
@@ -212,6 +196,7 @@ getHomeR = do
       <form method="post" action=@{HomeR}>
         $if state /= Start
           <input type="hidden" name="board" value="#{writeBoard nextBoard}">
+          <p>#{printBoard nextBoard True}
         $if state == PendingMoveEnd
           $maybe position <- mPosition
             <input type="hidden" name="start" value="#{position}">
