@@ -61,6 +61,7 @@ getState mStart mPosition
   | isJust mStart && isJust mPosition = PendingMoveStart
   | otherwise = PendingMoveEnd
 
+getHomeR :: HandlerFor App Html
 getHomeR = do
   mBoard <- lookupPostParam "board"
   mPosition <- lookupPostParam "position"
@@ -201,8 +202,10 @@ getHomeR = do
               <div class="column-label">#{cconv c}
     |]
 
+postHomeR :: HandlerFor App Html
 postHomeR = getHomeR
 
+getNotFoundR :: HandlerFor App Html
 getNotFoundR = defaultLayout $ do
   setTitle "Not found"
   toWidget [hamlet|<h1>Oof!|]
