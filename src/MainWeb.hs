@@ -66,7 +66,7 @@ getHomeR = do
   mPosition <- lookupPostParam "position"
   mStart <- lookupPostParam "start"
 
-  let state = getState mBoard mPosition
+  let state = getState mStart mPosition
 
   let mPreviousWhiteMove = case state of
         Start -> Nothing
