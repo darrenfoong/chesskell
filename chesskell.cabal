@@ -54,7 +54,7 @@ test-suite tests
   main-is:             Spec.hs
   ghc-options:         -Wall -Wincomplete-uni-patterns -Wno-missing-home-modules
   build-depends:       base,
-  					   text,
+                       text,
                        chesskell,
                        hspec,
                        hspec-discover
