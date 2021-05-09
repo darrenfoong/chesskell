@@ -14,7 +14,7 @@ import Data.Text (Text, append, pack, unpack)
 import Logic (genMove, respondBoard)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random
-import Types (Board, CPiece (..), Color (..), Piece (..), swapColor)
+import Types (Board, CPiece (..), Color (..), Move, Piece (..), swapColor)
 import Yesod
 import Yesod.Form
 
@@ -71,13 +71,19 @@ appLayout widget = do
             ^{pageBody pc}
     |]
 
-handleBoard :: StdGen -> Board -> Color -> String -> Either String String
+readBoard :: String -> Board
+readBoard boardStr = mkBoard
+
+writeBoard :: Board -> String
+writeBoard board = ""
+
+handleBoard :: StdGen -> Board -> Color -> String -> Either String Move
 handleBoard gen board color moveStr = do
   move <- parseMove moveStr
   advancedBoard <- advanceBoard board move color
   let (newGen, mMove) = genMove gen board color
    in case mMove of
-        Just m -> Right (show mMove)
+        Just m -> Right m
         Nothing -> Left "ERROR: Program has made an invalid move"
 
 getHomeR = do
@@ -101,19 +107,25 @@ getHomeR = do
         PendingMoveEnd -> Nothing
 
   let gen = unsafePerformIO getStdGen -- TODO Fix this
-  let board = mkBoard
+  let previousBoard = case state of
+        Start -> mkBoard
+        _ -> readBoard ""
   let color = White
-
-  -- TODO Board serdes
 
   let mPreviousBlackMove = case state of
         Start -> Nothing
         PendingMoveStart -> case mPreviousWhiteMove of
-          Just previousWhiteMove -> case handleBoard gen board color previousWhiteMove of
-            Left blackMove -> Just blackMove
-            Right error -> Just error -- TODO Fix this
+          Just previousWhiteMove -> case handleBoard gen previousBoard color previousWhiteMove of
+            Left error -> Nothing -- TODO Handle this
+            Right blackMove -> Just blackMove
           Nothing -> Nothing
-        PendingMoveEnd -> Just "TODO" -- TODO Carry over from previous state
+        PendingMoveEnd -> Nothing -- TODO Carry over from previous state
+  let nextBoard = case mPreviousBlackMove of
+        Just previousBlackMove -> case advanceBoard previousBoard previousBlackMove (swapColor color) of
+          Left error -> previousBoard -- TODO Handle this
+          Right board -> board
+        Nothing -> previousBoard
+
   defaultLayout $ do
     setTitle "chesskell"
     toWidget
@@ -173,7 +185,7 @@ getHomeR = do
       <p>You are White.
       $if state /= Start
         $maybe previousBlackMove <- mPreviousBlackMove
-          <p>Black played: #{previousBlackMove}
+          <p>Black played: #{show previousBlackMove}
 
       $if state /= PendingMoveEnd
         <p>Please select a piece.
@@ -195,7 +207,7 @@ getHomeR = do
               <div class="row-label">#{r}
               $forall c <- cs
                 <div class="column">
-                  <button name="position" title="#{cconv c}#{r}" value="#{cconv c}#{r}">#{prettyPrintPiece $ getPiece board (c, r)}
+                  <button name="position" title="#{cconv c}#{r}" value="#{cconv c}#{r}">#{prettyPrintPiece $ getPiece nextBoard (c, r)}
           <div class="row">
             <div class="row-label">
             $forall c <- cs
