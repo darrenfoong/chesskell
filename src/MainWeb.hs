@@ -6,18 +6,16 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
-import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, printBoard, readBoard, writeBoard)
-import Control.Applicative ((<$>), (<*>))
+import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, readBoard, writeBoard)
 import Data.Char
 import Data.Maybe
-import Data.Text (Text, append, chunksOf, pack, unpack)
-import Logic (genMove, respondBoard)
+import Data.Text (Text, append, unpack)
+import Logic (genMove)
 import Move (parseMove)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random
-import Types (Board, CPiece (..), Color (..), Move, Piece (..), swapColor)
+import Types (Color (White), swapColor)
 import Yesod
-import Yesod.Form
 
 data App = App
 
@@ -83,16 +81,16 @@ getHomeR = do
         Start -> mkBoard
         _ -> case mBoard of
           Just boardStr -> case readBoard boardStr of
-            Left error -> mkBoard
+            Left _ -> mkBoard
             Right board -> board
           Nothing -> mkBoard
   let color = White
 
   let intermediateBoard = case mPreviousWhiteMove of
         Just ePreviousWhiteMove -> case ePreviousWhiteMove of
-          Left error -> previousBoard -- TODO Handle this
+          Left _ -> previousBoard -- TODO Handle this
           Right previousWhiteMove -> case advanceBoard previousBoard previousWhiteMove color of
-            Left error -> previousBoard -- TODO Handle this
+            Left _ -> previousBoard -- TODO Handle this
             Right board -> board
         Nothing -> previousBoard
 
@@ -100,15 +98,15 @@ getHomeR = do
         Start -> Nothing
         PendingMoveStart -> case mPreviousWhiteMove of
           Just ePreviousWhiteMove -> case ePreviousWhiteMove of
-            Left error -> Nothing -- TODO Handle this
+            Left _ -> Nothing -- TODO Handle this
             Right previousWhiteMove ->
-              let (newGen, mMove) = genMove gen intermediateBoard (swapColor color)
+              let (_, mMove) = genMove gen intermediateBoard $ swapColor color
                in mMove
           Nothing -> Nothing
         PendingMoveEnd -> Nothing -- TODO Carry over from previous state
   let nextBoard = case mPreviousBlackMove of
-        Just previousBlackMove -> case advanceBoard intermediateBoard previousBlackMove (swapColor color) of
-          Left error -> previousBoard -- TODO Handle this
+        Just previousBlackMove -> case advanceBoard intermediateBoard previousBlackMove $ swapColor color of
+          Left _ -> previousBoard -- TODO Handle this
           Right board -> board
         Nothing -> previousBoard
 
