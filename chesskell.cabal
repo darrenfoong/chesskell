@@ -16,7 +16,8 @@ executable chesskell
                        Logic
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base,
-                       random
+                       random,
+                       text
   default-language:    Haskell2010
 
 executable chesskell-web
@@ -30,9 +31,9 @@ executable chesskell-web
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base,
                        random,
+                       text,
                        yesod,
-                       yesod-form,
-                       text
+                       yesod-form
   default-language:    Haskell2010
 
 library
@@ -43,7 +44,8 @@ library
                        Move,
                        Logic
   build-depends:       base,
-                       random
+                       random,
+                       text
   default-language:    Haskell2010
 
 test-suite tests
@@ -52,6 +54,7 @@ test-suite tests
   main-is:             Spec.hs
   ghc-options:         -Wall -Wincomplete-uni-patterns -Wno-missing-home-modules
   build-depends:       base,
+  					   text,
                        chesskell,
                        hspec,
                        hspec-discover

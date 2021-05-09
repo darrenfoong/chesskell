@@ -3,17 +3,18 @@ module Board
     mkPos,
     mkCoords,
     printBoard,
-    printRow,
+    prettyPrintPiece,
+    readBoard,
+    writeBoard,
     scoreBoard,
     advanceBoard,
     movePiece,
     getPiece,
     validMove,
-    unprintPiece,
-    prettyPrintPiece,
   )
 where
 
+import Data.Text (Text, chunksOf, pack, unpack)
 import Move (parseMove, validMovePiece)
 import Position (mkPos, mkPositions)
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position)
@@ -84,12 +85,12 @@ unprintPiece "R" = CP Black Rook
 unprintPiece "B" = CP Black Bishop
 unprintPiece "N" = CP Black Knight
 unprintPiece "P" = CP Black Pawn
-unprintPiece "k" = CP Black King
-unprintPiece "q" = CP Black Queen
-unprintPiece "r" = CP Black Rook
-unprintPiece "b" = CP Black Bishop
-unprintPiece "n" = CP Black Knight
-unprintPiece "p" = CP Black Pawn
+unprintPiece "k" = CP White King
+unprintPiece "q" = CP White Queen
+unprintPiece "r" = CP White Rook
+unprintPiece "b" = CP White Bishop
+unprintPiece "n" = CP White Knight
+unprintPiece "p" = CP White Pawn
 unprintPiece _ = Null
 
 prettyPrintPiece :: CPiece -> String
@@ -106,6 +107,15 @@ prettyPrintPiece (CP White Bishop) = "♗"
 prettyPrintPiece (CP White Knight) = "♘"
 prettyPrintPiece (CP White Pawn) = "♙"
 prettyPrintPiece Null = ""
+
+readBoard :: Text -> Either String Board
+readBoard boardStr = Right (map readRow $ chunksOf 8 boardStr)
+
+readRow :: Text -> [CPiece]
+readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
+
+writeBoard :: Board -> String
+writeBoard = concatMap printRow
 
 scoreBoard :: Color -> Board -> Int
 scoreBoard color = sum . map (sum . map (scoreColorPiece color))

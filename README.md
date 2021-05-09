@@ -3,8 +3,8 @@
 ## Formatting
 
 ```
-ormolu --mode inplace $(find . -name '*.hs')
-hlint .
+ormolu -i $(find . -name '*.hs')
+hlint src
 ```
 
 ## Building

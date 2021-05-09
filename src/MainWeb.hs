@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
-import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, printBoard, printRow, unprintPiece)
+import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, printBoard, readBoard, writeBoard)
 import Control.Applicative ((<$>), (<*>))
 import Data.Char
 import Data.Maybe
@@ -57,27 +57,18 @@ appLayout widget = do
             ^{pageBody pc}
     |]
 
-readBoard :: String -> Either String Board
-readBoard boardStr = Right (map readRow $ chunksOf 8 (pack boardStr))
-
-readRow :: Text -> [CPiece]
-readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
-
-writeBoard :: Board -> String
-writeBoard = concatMap printRow
+getState :: Maybe Text -> Maybe Text -> State
+getState mStart mPosition
+  | isNothing mStart && isNothing mPosition = Start
+  | isJust mStart && isNothing mPosition = PendingMoveStart
+  | otherwise = PendingMoveEnd
 
 getHomeR = do
   mBoard <- lookupPostParam "board"
   mPosition <- lookupPostParam "position"
   mStart <- lookupPostParam "start"
 
-  let state =
-        if isNothing mStart && isNothing mPosition
-          then Start
-          else
-            if isJust mStart && isJust mPosition
-              then PendingMoveStart
-              else PendingMoveEnd
+  let state = getState mBoard mPosition
 
   let mPreviousWhiteMove = case state of
         Start -> Nothing
@@ -91,7 +82,7 @@ getHomeR = do
   let previousBoard = case state of
         Start -> mkBoard
         _ -> case mBoard of
-          Just boardStr -> case readBoard (unpack boardStr) of
+          Just boardStr -> case readBoard boardStr of
             Left error -> mkBoard
             Right board -> board
           Nothing -> mkBoard
@@ -190,13 +181,12 @@ getHomeR = do
           <p>You selected <span>#{position}</span>. Please select where the piece should go.
     |]
     let cs = [1 .. 8]
-    let cconv = \i -> chr (i + ord 'a' - 1)
+    let cconv i = chr (i + ord 'a' - 1)
     let rs = reverse [1 .. 8]
     [whamlet|
       <form method="post" action=@{HomeR}>
         $if state /= Start
           <input type="hidden" name="board" value="#{writeBoard nextBoard}">
-          <p>#{printBoard nextBoard True}
         $if state == PendingMoveEnd
           $maybe position <- mPosition
             <input type="hidden" name="start" value="#{position}">
