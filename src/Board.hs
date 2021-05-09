@@ -5,7 +5,6 @@ module Board
     printBoard,
     scoreBoard,
     advanceBoard,
-    parseMove,
     movePiece,
     getPiece,
     validMove,

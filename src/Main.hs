@@ -1,6 +1,7 @@
-import Board (advanceBoard, mkBoard, parseMove, printBoard)
+import Board (advanceBoard, mkBoard, printBoard)
 import Control.Monad
 import Logic (respondBoard)
+import Move (parseMove)
 import System.Random
 import Types (Board, Color (..), swapColor)
 

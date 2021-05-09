@@ -6,12 +6,13 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
-import Board (advanceBoard, getPiece, mkBoard, parseMove)
+import Board (advanceBoard, getPiece, mkBoard)
 import Control.Applicative ((<$>), (<*>))
 import Data.Char
 import Data.Maybe
 import Data.Text (Text, append, pack, unpack)
 import Logic (genMove, respondBoard)
+import Move (parseMove)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), swapColor)
@@ -20,7 +21,7 @@ import Yesod.Form
 
 data App = App
 
-data State = Start | PendingMoveStart | PendingMoveEnd deriving (Eq)
+data State = Start | PendingMoveStart | PendingMoveEnd deriving (Eq, Show)
 
 prettyPrintPiece :: CPiece -> String
 prettyPrintPiece (CP Black King) = "♚"
@@ -77,15 +78,6 @@ readBoard boardStr = mkBoard
 writeBoard :: Board -> String
 writeBoard board = ""
 
-handleBoard :: StdGen -> Board -> Color -> String -> Either String Move
-handleBoard gen board color moveStr = do
-  move <- parseMove moveStr
-  advancedBoard <- advanceBoard board move color
-  let (newGen, mMove) = genMove gen board color
-   in case mMove of
-        Just m -> Right m
-        Nothing -> Left "ERROR: Program has made an invalid move"
-
 getHomeR = do
   mPosition <- lookupPostParam "position"
   mStart <- lookupPostParam "start"
@@ -103,7 +95,7 @@ getHomeR = do
         PendingMoveStart -> do
           start <- mStart
           end <- mPosition
-          return $ unpack $ append start end
+          return (parseMove $ unpack $ append start end)
         PendingMoveEnd -> Nothing
 
   let gen = unsafePerformIO getStdGen -- TODO Fix this
@@ -112,16 +104,26 @@ getHomeR = do
         _ -> readBoard ""
   let color = White
 
+  let intermediateBoard = case mPreviousWhiteMove of
+        Just ePreviousWhiteMove -> case ePreviousWhiteMove of
+          Left error -> previousBoard -- TODO Handle this
+          Right previousWhiteMove -> case advanceBoard previousBoard previousWhiteMove color of
+            Left error -> previousBoard -- TODO Handle this
+            Right board -> board
+        Nothing -> previousBoard
+
   let mPreviousBlackMove = case state of
         Start -> Nothing
         PendingMoveStart -> case mPreviousWhiteMove of
-          Just previousWhiteMove -> case handleBoard gen previousBoard color previousWhiteMove of
+          Just ePreviousWhiteMove -> case ePreviousWhiteMove of
             Left error -> Nothing -- TODO Handle this
-            Right blackMove -> Just blackMove
+            Right previousWhiteMove ->
+              let (newGen, mMove) = genMove gen intermediateBoard (swapColor color)
+               in mMove
           Nothing -> Nothing
         PendingMoveEnd -> Nothing -- TODO Carry over from previous state
   let nextBoard = case mPreviousBlackMove of
-        Just previousBlackMove -> case advanceBoard previousBoard previousBlackMove (swapColor color) of
+        Just previousBlackMove -> case advanceBoard intermediateBoard previousBlackMove (swapColor color) of
           Left error -> previousBoard -- TODO Handle this
           Right board -> board
         Nothing -> previousBoard
@@ -182,6 +184,7 @@ getHomeR = do
         }
       |]
     [whamlet|
+      <p>State: #{show state}
       <p>You are White.
       $if state /= Start
         $maybe previousBlackMove <- mPreviousBlackMove
