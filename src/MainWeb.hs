@@ -74,7 +74,7 @@ appLayout widget = do
     |]
 
 readBoard :: String -> Either String Board
-readBoard boardStr = Right (map readRow (chunksOf 8 boardStr))
+readBoard boardStr = Right (map readRow $ chunksOf 8 boardStr)
 
 readRow :: String -> [CPiece]
 readRow rowStr = replicate 8 (CP White Pawn)
