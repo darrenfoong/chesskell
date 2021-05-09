@@ -37,7 +37,7 @@ appLayout :: Widget -> Handler Html
 appLayout widget = do
   pc <- widgetToPageContent $ do
     widget
-    toWidgetHead [hamlet|<meta name="keywords" content="anki">|]
+    toWidgetHead [hamlet|<meta name="keywords" content="chess">|]
     toWidget
       [lucius|
         body { font: 1.0rem/1.1 sans-serif; }
