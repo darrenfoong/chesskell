@@ -3,6 +3,7 @@ module Board
     mkPos,
     mkCoords,
     printBoard,
+    printRow,
     scoreBoard,
     advanceBoard,
     movePiece,

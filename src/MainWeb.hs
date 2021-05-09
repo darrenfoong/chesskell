@@ -6,9 +6,10 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
-import Board (advanceBoard, getPiece, mkBoard)
+import Board (advanceBoard, getPiece, mkBoard, printRow)
 import Control.Applicative ((<$>), (<*>))
 import Data.Char
+import Data.List.Split (chunksOf)
 import Data.Maybe
 import Data.Text (Text, append, pack, unpack)
 import Logic (genMove, respondBoard)
@@ -72,13 +73,17 @@ appLayout widget = do
             ^{pageBody pc}
     |]
 
-readBoard :: String -> Board
-readBoard boardStr = mkBoard
+readBoard :: String -> Either String Board
+readBoard boardStr = Right (map readRow (chunksOf 8 boardStr))
+
+readRow :: String -> [CPiece]
+readRow rowStr = replicate 8 (CP White Pawn)
 
 writeBoard :: Board -> String
-writeBoard board = ""
+writeBoard = concatMap printRow
 
 getHomeR = do
+  mBoard <- lookupPostParam "board"
   mPosition <- lookupPostParam "position"
   mStart <- lookupPostParam "start"
 
@@ -101,7 +106,11 @@ getHomeR = do
   let gen = unsafePerformIO getStdGen -- TODO Fix this
   let previousBoard = case state of
         Start -> mkBoard
-        _ -> readBoard ""
+        _ -> case mBoard of
+          Just boardStr -> case readBoard (unpack boardStr) of
+            Left error -> mkBoard
+            Right board -> board
+          Nothing -> mkBoard
   let color = White
 
   let intermediateBoard = case mPreviousWhiteMove of
@@ -201,6 +210,8 @@ getHomeR = do
     let rs = reverse [1 .. 8]
     [whamlet|
       <form method="post" action=@{HomeR}>
+        $if state /= Start
+          <input type="hidden" name="board" value="#{writeBoard nextBoard}">
         $if state == PendingMoveEnd
           $maybe position <- mPosition
             <input type="hidden" name="start" value="#{position}">
