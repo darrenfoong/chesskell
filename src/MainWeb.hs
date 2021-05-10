@@ -78,7 +78,6 @@ getHomeR = do
           return (parseMove $ unpack $ append start end)
         PendingMoveEnd -> Nothing
 
-  let gen = unsafePerformIO getStdGen -- TODO Fix this
   let ePreviousBoard = case state of
         Start -> Right mkBoard
         _ -> case mBoard of
@@ -93,6 +92,7 @@ getHomeR = do
           previousBoard <- ePreviousBoard
           advanceBoard previousBoard previousWhiteMove color
 
+  let gen = unsafePerformIO getStdGen -- TODO Fix this
   let emPreviousBlackMove = case state of
         Start -> Right Nothing
         PendingMoveStart -> do
