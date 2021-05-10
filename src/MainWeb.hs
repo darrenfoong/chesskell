@@ -8,7 +8,7 @@
 
 import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, readBoard, writeBoard)
 import Data.Char
-import Data.Either (fromLeft, fromRight)
+import Data.Either (fromRight)
 import Data.Maybe
 import Data.Text (Text, append, unpack)
 import Logic (genMove)
@@ -88,31 +88,25 @@ getHomeR = do
 
   let ePreviousBoardWithWhite = case mPreviousWhiteMove of
         Nothing -> ePreviousBoard
-        Just ePreviousWhiteMove -> case ePreviousWhiteMove of
-          Left err -> Left err
-          Right previousWhiteMove -> case ePreviousBoard of
-            Left err -> Left err
-            Right previousBoard -> advanceBoard previousBoard previousWhiteMove color
+        Just ePreviousWhiteMove -> do
+          previousWhiteMove <- ePreviousWhiteMove
+          previousBoard <- ePreviousBoard
+          advanceBoard previousBoard previousWhiteMove color
 
   let emPreviousBlackMove = case state of
         Start -> Right Nothing
-        PendingMoveStart -> case mPreviousWhiteMove of
-          Nothing -> Right Nothing
-          Just ePreviousWhiteMove -> case ePreviousWhiteMove of
-            Left _ -> Right Nothing -- TODO Handle this
-            Right previousWhiteMove -> case ePreviousBoardWithWhite of
-              Left err -> Left err
-              Right previousBoardWithWhite ->
-                let (_, mMove) = genMove gen previousBoardWithWhite $ swapColor color
-                 in Right mMove
+        PendingMoveStart -> do
+          previousBoardWithWhite <- ePreviousBoardWithWhite
+          let (_, mMove) = genMove gen previousBoardWithWhite $ swapColor color
+           in Right mMove
         PendingMoveEnd -> Right Nothing -- TODO Carry over from previous state
-  let eNextBoard = case emPreviousBlackMove of
-        Left err -> Left err
-        Right mPreviousBlackMove -> case mPreviousBlackMove of
+  let eNextBoard = do
+        mPreviousBlackMove <- emPreviousBlackMove
+        case mPreviousBlackMove of
           Nothing -> ePreviousBoardWithWhite
-          Just previousBlackMove -> case ePreviousBoardWithWhite of
-            Left err -> Left err
-            Right previousBoardWithWhite -> case advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color of
+          Just previousBlackMove -> do
+            previousBoardWithWhite <- ePreviousBoardWithWhite
+            case advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color of
               Left _ -> ePreviousBoardWithWhite -- TODO Handle this
               Right board -> Right board
 
