@@ -13,7 +13,7 @@ data Piece = King | Queen | Rook | Bishop | Knight | Pawn deriving (Eq)
 
 data Color = Black | White deriving (Eq, Show)
 
-data CPiece = CP Color Piece | Null
+data CPiece = CP Color Piece | Null deriving (Eq)
 
 type Board = [[CPiece]]
 

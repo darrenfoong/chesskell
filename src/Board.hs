@@ -14,8 +14,8 @@ module Board
   )
 where
 
-import Data.Text (Text, chunksOf, pack, unpack)
-import Move (parseMove, validMovePiece)
+import Data.Text (Text, chunksOf, unpack)
+import Move (validMovePiece)
 import Position (mkPos, mkPositions)
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position)
 
@@ -199,10 +199,7 @@ removePiece :: Board -> Position -> (Board, CPiece)
 removePiece board (cn, rn) = alterBoardRow board rn (\r -> alterRow r cn (const Null))
 
 checkLineOfSightPos :: Board -> [Position] -> Bool
-checkLineOfSightPos _ [] = True
-checkLineOfSightPos board (p : ps) = case getPiece board p of
-  Null -> checkLineOfSightPos board ps
-  _ -> False
+checkLineOfSightPos board = all (\p -> getPiece board p == Null)
 
 advanceBoard :: Board -> Move -> Color -> Either String Board
 advanceBoard board move color =

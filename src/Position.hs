@@ -1,6 +1,7 @@
 module Position
   ( mkPos,
     mkPositions,
+    mkPositionsInner,
     validPos,
   )
 where
@@ -15,7 +16,13 @@ mkPositions :: Position -> Position -> [Position]
 mkPositions (sc, sr) (ec, er) =
   let cdelta = compareToInt sc ec
       rdelta = compareToInt sr er
-   in [(c, r) | c <- [sc, sc + cdelta .. ec], r <- [sr, sr + rdelta .. er]]
+      ps = mkPositionsInner (sc, sr) (ec, er) cdelta rdelta
+   in if length ps <= 1 then [] else tail ps
+
+mkPositionsInner :: Position -> Position -> Int -> Int -> [Position]
+mkPositionsInner (sc, sr) (ec, er) cdelta rdelta
+  | sc == ec && sr == er = []
+  | otherwise = (sc, sr) : mkPositionsInner (sc + cdelta, sr + rdelta) (ec, er) cdelta rdelta
 
 validPos :: Position -> Bool
 validPos (c, r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)

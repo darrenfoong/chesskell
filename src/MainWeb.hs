@@ -92,7 +92,7 @@ getHomeR = do
           previousBoard <- ePreviousBoard
           advanceBoard previousBoard previousWhiteMove color
 
-  let gen = unsafePerformIO getStdGen -- TODO Fix this
+  let gen = unsafePerformIO newStdGen -- TODO Fix this
   let emPreviousBlackMove = case state of
         Start -> Right Nothing
         PendingMoveStart -> do
