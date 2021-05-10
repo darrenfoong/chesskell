@@ -8,6 +8,7 @@
 
 import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, readBoard, writeBoard)
 import Data.Char
+import Data.Either (fromLeft, fromRight)
 import Data.Maybe
 import Data.Text (Text, append, unpack)
 import Logic (genMove)
@@ -78,38 +79,46 @@ getHomeR = do
         PendingMoveEnd -> Nothing
 
   let gen = unsafePerformIO getStdGen -- TODO Fix this
-  let previousBoard = case state of
-        Start -> mkBoard
+  let ePreviousBoard = case state of
+        Start -> Right mkBoard
         _ -> case mBoard of
-          Nothing -> mkBoard
-          Just boardStr -> case readBoard boardStr of
-            Left _ -> mkBoard
-            Right board -> board
+          Nothing -> Left "ERROR: Inconsistent state; expected post parameter \"board\""
+          Just boardStr -> readBoard boardStr
   let color = White
 
-  let intermediateBoard = case mPreviousWhiteMove of
-        Nothing -> previousBoard
+  let ePreviousBoardWithWhite = case mPreviousWhiteMove of
+        Nothing -> ePreviousBoard
         Just ePreviousWhiteMove -> case ePreviousWhiteMove of
-          Left _ -> previousBoard -- TODO Handle this
-          Right previousWhiteMove -> case advanceBoard previousBoard previousWhiteMove color of
-            Left _ -> previousBoard -- TODO Handle this
-            Right board -> board
+          Left err -> Left err
+          Right previousWhiteMove -> case ePreviousBoard of
+            Left err -> Left err
+            Right previousBoard -> advanceBoard previousBoard previousWhiteMove color
 
-  let mPreviousBlackMove = case state of
-        Start -> Nothing
+  let emPreviousBlackMove = case state of
+        Start -> Right Nothing
         PendingMoveStart -> case mPreviousWhiteMove of
-          Nothing -> Nothing
+          Nothing -> Right Nothing
           Just ePreviousWhiteMove -> case ePreviousWhiteMove of
-            Left _ -> Nothing -- TODO Handle this
-            Right previousWhiteMove ->
-              let (_, mMove) = genMove gen intermediateBoard $ swapColor color
-               in mMove
-        PendingMoveEnd -> Nothing -- TODO Carry over from previous state
-  let nextBoard = case mPreviousBlackMove of
-        Nothing -> previousBoard
-        Just previousBlackMove -> case advanceBoard intermediateBoard previousBlackMove $ swapColor color of
-          Left _ -> previousBoard -- TODO Handle this
-          Right board -> board
+            Left _ -> Right Nothing -- TODO Handle this
+            Right previousWhiteMove -> case ePreviousBoardWithWhite of
+              Left err -> Left err
+              Right previousBoardWithWhite ->
+                let (_, mMove) = genMove gen previousBoardWithWhite $ swapColor color
+                 in Right mMove
+        PendingMoveEnd -> Right Nothing -- TODO Carry over from previous state
+  let eNextBoard = case emPreviousBlackMove of
+        Left err -> Left err
+        Right mPreviousBlackMove -> case mPreviousBlackMove of
+          Nothing -> ePreviousBoardWithWhite
+          Just previousBlackMove -> case ePreviousBoardWithWhite of
+            Left err -> Left err
+            Right previousBoardWithWhite -> case advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color of
+              Left _ -> ePreviousBoardWithWhite -- TODO Handle this
+              Right board -> Right board
+
+  let mPreviousBlackMove = fromRight Nothing emPreviousBlackMove
+  let mNextBoard = either (const Nothing) Just eNextBoard
+  let mErr = either Just (const Nothing) eNextBoard
 
   defaultLayout $ do
     setTitle "chesskell"
@@ -167,12 +176,13 @@ getHomeR = do
         }
       |]
     [whamlet|
+      $maybe err <- mErr
+        <p>#{err}
       <p>State: #{show state}
       <p>You are White.
       $if state /= Start
         $maybe previousBlackMove <- mPreviousBlackMove
           <p>Black played: #{show previousBlackMove}
-
       $if state /= PendingMoveEnd
         <p>Please select a piece.
       $else
@@ -184,22 +194,23 @@ getHomeR = do
     let rs = reverse [1 .. 8]
     [whamlet|
       <form method="post" action=@{HomeR}>
-        $if state /= Start
+        $maybe nextBoard <- mNextBoard
           <input type="hidden" name="board" value="#{writeBoard nextBoard}">
         $if state == PendingMoveEnd
           $maybe position <- mPosition
             <input type="hidden" name="start" value="#{position}">
-        <div id="board">
-          $forall r <- rs
+        $maybe nextBoard <- mNextBoard
+          <div id="board">
+            $forall r <- rs
+              <div class="row">
+                <div class="row-label">#{r}
+                $forall c <- cs
+                  <div class="column">
+                    <button name="position" title="#{cconv c}#{r}" value="#{cconv c}#{r}">#{prettyPrintPiece $ getPiece nextBoard (c, r)}
             <div class="row">
-              <div class="row-label">#{r}
+              <div class="row-label">
               $forall c <- cs
-                <div class="column">
-                  <button name="position" title="#{cconv c}#{r}" value="#{cconv c}#{r}">#{prettyPrintPiece $ getPiece nextBoard (c, r)}
-          <div class="row">
-            <div class="row-label">
-            $forall c <- cs
-              <div class="column-label">#{cconv c}
+                <div class="column-label">#{cconv c}
     |]
 
 postHomeR :: HandlerFor App Html
