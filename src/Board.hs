@@ -142,14 +142,13 @@ validMove board (start, end) color =
         in case startPiece of
              CP startColor _ ->
                startColor == color
+                 && checkLineOfSight board startPiece (start, end)
                  && case getPiece board end of
                    Null ->
                      validMovePiece startPiece False (start, end)
-                       && checkLineOfSight board startPiece (start, end)
                    CP endColor _ ->
                      startColor /= endColor
                        && validMovePiece startPiece True (start, end)
-                       && checkLineOfSight board startPiece (start, end)
              Null -> False
 
 checkLineOfSight :: Board -> CPiece -> Move -> Bool
