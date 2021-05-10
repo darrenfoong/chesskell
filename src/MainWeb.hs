@@ -100,19 +100,19 @@ getHomeR = do
           let (_, mMove) = genMove gen previousBoardWithWhite $ swapColor color
            in Right mMove
         PendingMoveEnd -> Right Nothing -- TODO Carry over from previous state
-  let eNextBoard = do
+  let ePreviousBoardWithBlack = do
         mPreviousBlackMove <- emPreviousBlackMove
         case mPreviousBlackMove of
           Nothing -> ePreviousBoardWithWhite
           Just previousBlackMove -> do
             previousBoardWithWhite <- ePreviousBoardWithWhite
-            case advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color of
-              Left _ -> ePreviousBoardWithWhite -- TODO Handle this
-              Right board -> Right board
+            advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color
 
   let mPreviousBlackMove = fromRight Nothing emPreviousBlackMove
-  let mNextBoard = either (const Nothing) Just eNextBoard
-  let mErr = either Just (const Nothing) eNextBoard
+  let mErr = either Just (const Nothing) ePreviousBoardWithBlack
+  let mNextBoard = case ePreviousBoardWithBlack of
+        Left _ -> either (const Nothing) Just ePreviousBoard
+        Right previousBoardWithBlack -> Just previousBoardWithBlack
 
   defaultLayout $ do
     setTitle "chesskell"
