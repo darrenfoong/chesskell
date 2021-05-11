@@ -28,16 +28,21 @@ scorePiece (CP _ Pawn) = 1
 scorePiece Null = 0
 
 isInCheckmate :: Color -> Board -> Bool
-isInCheckmate color board =
-  let possibleMoves = genPossibleMovesPiece board (getKingPosition color board)
-      possibleEnds = map snd possibleMoves
-   in any (isUnderAttack color board) possibleEnds
+isInCheckmate color board = do
+  case getKingPosition color board of
+    Nothing -> True
+    Just kingPosition ->
+      let possibleMoves = genPossibleMovesPiece board kingPosition
+          possibleEnds = map snd possibleMoves
+       in any (isUnderAttack color board) possibleEnds
 
 isUnderAttack :: Color -> Board -> Position -> Bool
 isUnderAttack color board pos = elem pos $ map snd $ genMoves board $ swapColor color
 
-getKingPosition :: Color -> Board -> Position
-getKingPosition color board = head $ filter (\p -> getPiece board p == CP color King) (genPositions board color)
+getKingPosition :: Color -> Board -> Maybe Position
+getKingPosition color board = case filter (\p -> getPiece board p == CP color King) (genPositions board color) of
+  [] -> Nothing
+  p : _ -> Just p
 
 respondBoard :: StdGen -> Board -> Color -> (StdGen, Either String Board)
 respondBoard gen board color =
