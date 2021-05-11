@@ -34,7 +34,7 @@ isInCheckmate color board = do
     Just kingPosition ->
       let possibleMoves = genPossibleMovesPiece board kingPosition
           possibleEnds = map snd possibleMoves
-       in any (isUnderAttack color board) possibleEnds
+       in all (isUnderAttack color board) (kingPosition:possibleEnds)
 
 isUnderAttack :: Color -> Board -> Position -> Bool
 isUnderAttack color board pos = elem pos $ map snd $ genMoves board $ swapColor color
