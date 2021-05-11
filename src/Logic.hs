@@ -1,13 +1,42 @@
 module Logic
-  ( genMove,
+  ( scoreBoard,
+    genMove,
     respondBoard,
   )
 where
 
-import Board (advanceBoard, getPiece, mkCoords, movePiece, scoreBoard, validMove)
+import Board (advanceBoard, getPiece, mkCoords, movePiece, validMove)
 import Data.List
 import System.Random
-import Types (Board, CPiece (..), Color (..), Move, Position, swapColor)
+import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
+
+scoreBoard :: Color -> Board -> Int
+scoreBoard color board = (sum . map (sum . map (scoreColorPiece color))) board + if isInCheckmate color board then -100 else 0
+
+scoreColorPiece :: Color -> CPiece -> Int
+scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
+scoreColorPiece _ Null = 0
+
+scorePiece :: CPiece -> Int
+scorePiece (CP _ King) = 0
+scorePiece (CP _ Queen) = 9
+scorePiece (CP _ Rook) = 5
+scorePiece (CP _ Bishop) = 3
+scorePiece (CP _ Knight) = 3
+scorePiece (CP _ Pawn) = 1
+scorePiece Null = 0
+
+isInCheckmate :: Color -> Board -> Bool
+isInCheckmate color board =
+  let possibleMoves = genPossibleMovesPiece board (getKingPosition color board)
+      possibleEnds = map snd possibleMoves
+   in any (isUnderAttack color board) possibleEnds
+
+isUnderAttack :: Color -> Board -> Position -> Bool
+isUnderAttack color board pos = False
+
+getKingPosition :: Color -> Board -> Position
+getKingPosition color board = head $ filter (\p -> getPiece board p == CP color King) (genPositions board color)
 
 respondBoard :: StdGen -> Board -> Color -> (StdGen, Either String Board)
 respondBoard gen board color =

@@ -6,7 +6,6 @@ module Board
     prettyPrintPiece,
     readBoard,
     writeBoard,
-    scoreBoard,
     advanceBoard,
     movePiece,
     getPiece,
@@ -116,24 +115,6 @@ readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
 
 writeBoard :: Board -> String
 writeBoard = concatMap printRow
-
-scoreBoard :: Color -> Board -> Int
-scoreBoard color = sum . map (sum . map (scoreColorPiece color))
-
-scoreColorPiece :: Color -> CPiece -> Int
-scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
-scoreColorPiece _ Null = 0
-
-scorePiece :: CPiece -> Int
-scorePiece (CP _ King) = 0
-scorePiece (CP _ Queen) = 9
-scorePiece (CP _ Rook) = 5
-scorePiece (CP _ Bishop) = 3
-scorePiece (CP _ Knight) = 3
-scorePiece (CP _ Pawn) = 1
-scorePiece Null = 0
-
--- todo: checkmate check
 
 validMove :: Board -> Move -> Color -> Bool
 validMove board (start, end) color =
