@@ -1,6 +1,7 @@
 module Logic
   ( scoreBoard,
     genMove,
+    isInCheckmate,
     respondBoard,
   )
 where
@@ -33,7 +34,7 @@ isInCheckmate color board =
    in any (isUnderAttack color board) possibleEnds
 
 isUnderAttack :: Color -> Board -> Position -> Bool
-isUnderAttack color board pos = False
+isUnderAttack color board pos = elem pos $ map snd $ genMoves board $ swapColor color
 
 getKingPosition :: Color -> Board -> Position
 getKingPosition color board = head $ filter (\p -> getPiece board p == CP color King) (genPositions board color)

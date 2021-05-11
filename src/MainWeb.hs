@@ -11,11 +11,11 @@ import Data.Char
 import Data.Either (fromRight)
 import Data.Maybe
 import Data.Text (Text, append, unpack)
-import Logic (genMove)
+import Logic (genMove, isInCheckmate)
 import Move (parseMove)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random
-import Types (Color (White), swapColor)
+import Types (Color (..), swapColor)
 import Yesod
 
 data App = App
@@ -174,6 +174,9 @@ getHomeR = do
         <p>#{err}
       <p>State: #{show state}
       <p>You are White.
+      $maybe nextBoard <- mNextBoard
+        <p>White in checkmate: #{show (isInCheckmate White nextBoard)}
+        <p>Black in checkmate: #{show (isInCheckmate Black nextBoard)}
       $if state /= Start
         $maybe previousBlackMove <- mPreviousBlackMove
           <p>Black played: #{show previousBlackMove}
