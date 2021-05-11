@@ -46,7 +46,7 @@ isInCheckmate color board = do
                 Nothing -> False
                 Just nextKingPosition -> isUnderAttack color b nextKingPosition
             )
-            filteredPossibleNextBoards
+            (board : filteredPossibleNextBoards)
 
 isUnderAttack :: Color -> Board -> Position -> Bool
 isUnderAttack color board pos = elem pos $ map snd $ genMoves board $ swapColor color
