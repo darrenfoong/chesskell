@@ -11,7 +11,7 @@ import Data.Char
 import Data.Either (fromRight)
 import Data.Maybe
 import Data.Text (Text, append, unpack)
-import Logic (genMove, isInCheck, isInCheckmate)
+import Logic (genMove, isInCheck, isInCheckmate, scoreBoard)
 import Move (readMove, writeMove)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random
@@ -175,8 +175,8 @@ getHomeR = do
       <p>State: #{show state}
       <p>You are White.
       $maybe nextBoard <- mNextBoard
-        <p>White in check: #{show (isInCheck White nextBoard)}; checkmate: #{show (isInCheckmate White nextBoard)}
-        <p>Black in check: #{show (isInCheck Black nextBoard)}; checkmate: #{show (isInCheckmate Black nextBoard)}
+        <p>White: score: #{scoreBoard White nextBoard}; check: #{show (isInCheck White nextBoard)}; checkmate: #{show (isInCheckmate White nextBoard)}
+        <p>Black: score: #{scoreBoard Black nextBoard}; check: #{show (isInCheck Black nextBoard)}; checkmate: #{show (isInCheckmate Black nextBoard)}
       $if state /= Start
         $maybe previousBlackMove <- mPreviousBlackMove
           <p>Black played: #{writeMove previousBlackMove}
