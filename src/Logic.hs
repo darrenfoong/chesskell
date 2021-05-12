@@ -14,7 +14,10 @@ import System.Random
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
 
 scoreBoard :: Color -> Board -> Int
-scoreBoard color board = (sum . map (sum . map (scoreColorPiece color))) board + if isInCheck color board then -1000 else 0 + 2 * scoreBoardCenter color board
+scoreBoard color board = scoreBoardInner color board - scoreBoardInner (swapColor color) board
+
+scoreBoardInner :: Color -> Board -> Int
+scoreBoardInner color board = (sum . map (sum . map (scoreColorPiece color))) board + if isInCheck color board then -1000 else 0
 
 scoreColorPiece :: Color -> CPiece -> Int
 scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
@@ -22,7 +25,7 @@ scoreColorPiece _ Null = 0
 
 scoreBoardCenter :: Color -> Board -> Int
 scoreBoardCenter color board =
-  let centerPieces = [(getPiece board) (c, r) | c <- [3 .. 6], r <- [3 .. 6]]
+  let centerPieces = [getPiece board (c, r) | c <- [3 .. 6], r <- [3 .. 6]]
    in (sum . map (scoreColorPiece color)) centerPieces
 
 scorePiece :: CPiece -> Int
@@ -61,12 +64,12 @@ respondBoard gen board color =
 
 genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove gen board color =
-  let (_, m) = minimax board color color 3 True
+  let (_, m) = minimax gen board color color 3 True
    in (gen, Just m)
 
-minimax :: Board -> Color -> Color -> Int -> Bool -> (Int, Move)
-minimax board scoringColor playerColor 1 maximising = maximumBy (compareMove maximising) $ map (\m -> (scoreBoard scoringColor (movePiece board m), m)) $ genMoves board playerColor
-minimax board scoringColor playerColor n maximising = maximumBy (compareMove maximising) $ map (\m -> let (s, _) = minimax (movePiece board m) scoringColor (swapColor playerColor) (n -1) (not maximising) in (s, m)) $ genMoves board playerColor
+minimax :: StdGen -> Board -> Color -> Color -> Int -> Bool -> (Int, Move)
+minimax gen board scoringColor playerColor 1 maximising = maximumBy (compareMove maximising) $ map (\m -> (scoreBoard scoringColor (movePiece board m), m)) $ genMoves board playerColor
+minimax gen board scoringColor playerColor n maximising = maximumBy (compareMove maximising) $ map (\m -> let (s, _) = minimax gen (movePiece board m) scoringColor (swapColor playerColor) (n -1) (not maximising) in (s, m)) $ genMoves board playerColor
 
 compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
 compareMove maximising (s1, _) (s2, _) = if maximising then compare s1 s2 else compare s2 s1
