@@ -1,6 +1,6 @@
 module Board
   ( mkBoard,
-    mkPos,
+    mkPosition,
     mkCoords,
     printBoard,
     prettyPrintPiece,
@@ -15,7 +15,7 @@ where
 
 import Data.Text (Text, chunksOf, unpack)
 import Move (validMovePiece)
-import Position (mkPos, mkPositions)
+import Position (mkPosition, mkPositions)
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position)
 
 mkBoard :: Board

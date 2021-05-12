@@ -1,21 +1,21 @@
 module PositionSpec where
 
-import Position (mkPos, mkPositions, mkPositionsInner, validPos)
+import Position (isValidPosition, mkPosition, mkPositions, mkPositionsInner)
 import Test.Hspec
 
 {- HLINT ignore "Redundant do" -}
 spec :: Spec
 spec = do
-  describe "mkPos" $ do
+  describe "mkPosition" $ do
     it "converts (e, 2) to (5, 2)" $ do
-      mkPos ('e', '2') `shouldBe` (5, 2)
+      mkPosition ('e', '2') `shouldBe` (5, 2)
 
-  describe "validPos" $ do
+  describe "isValidPosition" $ do
     it "marks (1, 1) as valid" $ do
-      (1, 1) `shouldSatisfy` validPos
+      (1, 1) `shouldSatisfy` isValidPosition
 
     it "marks (9, 14) as invalid" $ do
-      (9, 14) `shouldNotSatisfy` validPos
+      (9, 14) `shouldNotSatisfy` isValidPosition
 
   describe "mkPositions" $ do
     it "makes correct positions between (1, 1) and (1, 1)" $ do

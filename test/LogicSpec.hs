@@ -1,6 +1,6 @@
 module LogicSpec where
 
-import Board (mkBoard, readBoard, writeBoard)
+import Board (mkBoard, readBoard)
 import Data.Text (pack)
 import Logic (isInCheckmate)
 import Test.Hspec

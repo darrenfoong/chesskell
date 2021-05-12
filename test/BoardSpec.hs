@@ -10,6 +10,6 @@ spec = do
   describe "writeBoard and readBoard" $ do
     it "serialize properly" $ do
       let deserializedBoard = case readBoard $ pack $ writeBoard mkBoard of
-            Left error -> []
+            Left _ -> []
             Right board -> board
       writeBoard deserializedBoard `shouldBe` writeBoard mkBoard

@@ -1,16 +1,16 @@
 module Position
-  ( mkPos,
+  ( mkPosition,
     mkPositions,
     mkPositionsInner,
-    validPos,
+    isValidPosition,
   )
 where
 
 import Data.Char
 import Types (Position)
 
-mkPos :: (Char, Char) -> Position
-mkPos (c, r) = (ord c - ord 'a' + 1, digitToInt r)
+mkPosition :: (Char, Char) -> Position
+mkPosition (c, r) = (ord c - ord 'a' + 1, digitToInt r)
 
 mkPositions :: Position -> Position -> [Position]
 mkPositions (sc, sr) (ec, er) =
@@ -24,8 +24,8 @@ mkPositionsInner (sc, sr) (ec, er) cdelta rdelta
   | sc == ec && sr == er = []
   | otherwise = (sc, sr) : mkPositionsInner (sc + cdelta, sr + rdelta) (ec, er) cdelta rdelta
 
-validPos :: Position -> Bool
-validPos (c, r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
+isValidPosition :: Position -> Bool
+isValidPosition (c, r) = (1 <= c) && (c <= 8) && (1 <= r) && (r <= 8)
 
 compareToInt :: Int -> Int -> Int
 compareToInt a b

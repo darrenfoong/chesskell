@@ -4,14 +4,14 @@ module Move
   )
 where
 
-import Position (mkPos, validPos)
+import Position (isValidPosition, mkPosition)
 import Types (CPiece (..), Color (..), Move, Piece (..))
 
 parseMove :: String -> Either String Move
 parseMove moveStr@(sc : sr : ec : er : _) =
-  let start = mkPos (sc, sr)
-      end = mkPos (ec, er)
-   in if validPos start && validPos end
+  let start = mkPosition (sc, sr)
+      end = mkPosition (ec, er)
+   in if isValidPosition start && isValidPosition end
         then Right (start, end)
         else Left $ "ERROR: Invalid move string: " ++ moveStr
 parseMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
