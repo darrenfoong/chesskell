@@ -14,11 +14,16 @@ import System.Random
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
 
 scoreBoard :: Color -> Board -> Int
-scoreBoard color board = (sum . map (sum . map (scoreColorPiece color))) board + if isInCheckmate color board then -100 else 0
+scoreBoard color board = (sum . map (sum . map (scoreColorPiece color))) board + if isInCheck color board then -1000 else 0 + 2 * scoreBoardCenter color board
 
 scoreColorPiece :: Color -> CPiece -> Int
 scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
 scoreColorPiece _ Null = 0
+
+scoreBoardCenter :: Color -> Board -> Int
+scoreBoardCenter color board =
+  let centerPieces = [(getPiece board) (c, r) | c <- [3 .. 6], r <- [3 .. 6]]
+   in (sum . map (scoreColorPiece color)) centerPieces
 
 scorePiece :: CPiece -> Int
 scorePiece (CP _ King) = 0
