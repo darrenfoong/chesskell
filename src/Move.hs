@@ -5,7 +5,7 @@ module Move
   )
 where
 
-import Data.Char (intToDigit)
+import Data.Char (intToDigit, ord, chr)
 import Position (isValidPosition, mkPosition)
 import Types (CPiece (..), Color (..), Move, Piece (..))
 
@@ -19,7 +19,8 @@ readMove moveStr@(sc : sr : ec : er : _) =
 readMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
 
 writeMove :: Move -> String
-writeMove ((sc, sr), (ec, er)) = intToDigit sc : intToDigit sr : intToDigit ec : intToDigit er : []
+writeMove ((sc, sr), (ec, er)) = let f n = chr $ ord 'a' + n - 1
+                                  in [f sc, intToDigit sr, f ec, intToDigit er]
 
 validMovePiece :: CPiece -> Bool -> Move -> Bool
 validMovePiece (CP Black Pawn) False ((sc, sr), (ec, er)) =

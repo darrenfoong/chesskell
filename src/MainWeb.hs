@@ -169,6 +169,23 @@ getHomeR = do
           text-align: center;
         }
       |]
+    [whamlet|
+      $maybe err <- mErr
+        <p>#{err}
+      <p>State: #{show state}
+      <p>You are White.
+      $maybe nextBoard <- mNextBoard
+        <p>White in check: #{show (isInCheck White nextBoard)}; checkmate: #{show (isInCheckmate White nextBoard)}
+        <p>Black in check: #{show (isInCheck Black nextBoard)}; checkmate: #{show (isInCheckmate Black nextBoard)}
+      $if state /= Start
+        $maybe previousBlackMove <- mPreviousBlackMove
+          <p>Black played: #{writeMove previousBlackMove}
+      $if state /= PendingMoveEnd
+        <p>Please select a piece.
+      $else
+        $maybe position <- mPosition
+          <p>You selected <span>#{position}</span>. Please select where the piece should go.
+    |]
     let cs = [1 .. 8]
     let cconv i = chr (i + ord 'a' - 1)
     let rs = reverse [1 .. 8]
@@ -191,25 +208,6 @@ getHomeR = do
               <div class="row-label">
               $forall c <- cs
                 <div class="column-label">#{cconv c}
-    |]
-    [whamlet|
-      $maybe err <- mErr
-        <p>#{err}
-      <p>State: #{show state}
-      <p>You are White.
-      $maybe nextBoard <- mNextBoard
-        <p>White in check: #{show (isInCheck White nextBoard)}
-        <p>White in checkmate: #{show (isInCheckmate White nextBoard)}
-        <p>Black in check: #{show (isInCheck Black nextBoard)}
-        <p>Black in checkmate: #{show (isInCheckmate Black nextBoard)}
-      $if state /= Start
-        $maybe previousBlackMove <- mPreviousBlackMove
-          <p>Black played: #{writeMove previousBlackMove}
-      $if state /= PendingMoveEnd
-        <p>Please select a piece.
-      $else
-        $maybe position <- mPosition
-          <p>You selected <span>#{position}</span>. Please select where the piece should go.
     |]
 
 postHomeR :: HandlerFor App Html
