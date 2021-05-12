@@ -2,11 +2,13 @@ module Logic
   ( scoreBoard,
     genMove,
     isInCheckmate,
+    isInCheck,
     respondBoard,
   )
 where
 
 import Board (advanceBoard, getPiece, mkCoords, movePiece, validMove)
+import Data.Either (fromRight)
 import Data.List
 import System.Random
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
@@ -28,24 +30,14 @@ scorePiece (CP _ Pawn) = 1
 scorePiece Null = 0
 
 isInCheckmate :: Color -> Board -> Bool
-isInCheckmate color board = case getKingPosition color board of
-  Nothing -> True
-  Just kingPosition ->
-    let possibleMoves = genPossibleMovesPiece board kingPosition
-        possibleNextBoards =
-          map
-            ( \m -> case advanceBoard board m color of
-                Left _ -> []
-                Right advancedBoard -> advancedBoard
-            )
-            possibleMoves
-        filteredPossibleNextBoards = filter (/= []) possibleNextBoards
-     in all
-          ( \b -> case getKingPosition color b of
-              Nothing -> False
-              Just nextKingPosition -> isUnderAttack color b nextKingPosition
-          )
-          (board : filteredPossibleNextBoards)
+isInCheckmate color board =
+  let possibleMoves = genMoves board color
+      possibleNextBoards = map (\m -> fromRight [] $ advanceBoard board m color) possibleMoves
+      filteredPossibleNextBoards = filter (/= []) possibleNextBoards
+   in all (isInCheck color) (board : filteredPossibleNextBoards)
+
+isInCheck :: Color -> Board -> Bool
+isInCheck color board = maybe False (isUnderAttack color board) (getKingPosition color board)
 
 isUnderAttack :: Color -> Board -> Position -> Bool
 isUnderAttack color board pos = elem pos $ map snd $ genMoves board $ swapColor color

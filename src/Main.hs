@@ -1,7 +1,7 @@
 import Board (advanceBoard, mkBoard, printBoard)
 import Control.Monad
 import Logic (respondBoard)
-import Move (parseMove)
+import Move (readMove)
 import System.Random
 import Types (Board, Color (..), swapColor)
 
@@ -21,7 +21,7 @@ loopBoard gen board color = forever $ do
 
 loopBoardInner :: StdGen -> Board -> Color -> String -> Either String (StdGen, Board)
 loopBoardInner gen board color moveStr = do
-  move <- parseMove moveStr
+  move <- readMove moveStr
   advancedBoard <- advanceBoard board move color
   let (newGen, mBoard) = respondBoard gen advancedBoard $ swapColor color
    in do

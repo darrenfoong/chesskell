@@ -1,20 +1,25 @@
 module Move
-  ( parseMove,
+  ( readMove,
+    writeMove,
     validMovePiece,
   )
 where
 
+import Data.Char (intToDigit)
 import Position (isValidPosition, mkPosition)
 import Types (CPiece (..), Color (..), Move, Piece (..))
 
-parseMove :: String -> Either String Move
-parseMove moveStr@(sc : sr : ec : er : _) =
+readMove :: String -> Either String Move
+readMove moveStr@(sc : sr : ec : er : _) =
   let start = mkPosition (sc, sr)
       end = mkPosition (ec, er)
    in if isValidPosition start && isValidPosition end
         then Right (start, end)
         else Left $ "ERROR: Invalid move string: " ++ moveStr
-parseMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
+readMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
+
+writeMove :: Move -> String
+writeMove ((sc, sr), (ec, er)) = intToDigit sc : intToDigit sr : intToDigit ec : intToDigit er : []
 
 validMovePiece :: CPiece -> Bool -> Move -> Bool
 validMovePiece (CP Black Pawn) False ((sc, sr), (ec, er)) =
