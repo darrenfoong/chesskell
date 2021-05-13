@@ -11,6 +11,7 @@ import Board (advanceBoard, getPiece, mkCoords, movePiece, validMove)
 import Data.Either (fromRight)
 import Data.List
 import System.Random
+import System.Random.Shuffle (shuffle')
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
 
 scoreBoard :: Color -> Board -> Int
@@ -64,15 +65,24 @@ respondBoard gen board color =
 
 genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove gen board color =
-  let (_, m) = minimax gen board color color 3 True
-   in (gen, Just m)
+  let (gen1, gen2) = split gen
+      f ms = shuffle' ms (length ms) gen1
+      (_, m) = minimax f board color color 3 True
+   in (gen2, Just m)
 
-minimax :: StdGen -> Board -> Color -> Color -> Int -> Bool -> (Int, Move)
-minimax gen board scoringColor playerColor 1 maximising = maximumBy (compareMove maximising) $ map (\m -> (scoreBoard scoringColor (movePiece board m), m)) $ genMoves board playerColor
-minimax gen board scoringColor playerColor n maximising = maximumBy (compareMove maximising) $ map (\m -> let (s, _) = minimax gen (movePiece board m) scoringColor (swapColor playerColor) (n -1) (not maximising) in (s, m)) $ genMoves board playerColor
+minimax :: ([Move] -> [Move]) -> Board -> Color -> Color -> Int -> Bool -> (Int, Move)
+minimax f board scoringColor playerColor 1 maximising = maximumBy (compareMove maximising) $ map (\m -> (scoreBoard scoringColor (movePiece board m), m)) $ f $ genNonCheckMoves board playerColor
+minimax f board scoringColor playerColor n maximising = maximumBy (compareMove maximising) $ map (\m -> let (s, _) = minimax f (movePiece board m) scoringColor (swapColor playerColor) (n -1) (not maximising) in (s, m)) $ f $ genNonCheckMoves board playerColor
 
 compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
 compareMove maximising (s1, _) (s2, _) = if maximising then compare s1 s2 else compare s2 s1
+
+genNonCheckMoves :: Board -> Color -> [Move]
+genNonCheckMoves board color =
+  let possibleMoves = genMoves board color
+      possibleNextMoveBoards = map (\m -> (m, fromRight [] $ advanceBoard board m color)) possibleMoves
+      filteredPossibleNextMoveBoards = filter (\(_, b) -> b /= []) possibleNextMoveBoards
+   in map fst $ filter (\(_, b) -> not $ isInCheck color b) filteredPossibleNextMoveBoards
 
 genMoves :: Board -> Color -> [Move]
 genMoves board color = concatMap (genPossibleMovesPiece board) (genPositions board color)
