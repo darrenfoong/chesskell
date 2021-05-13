@@ -10,6 +10,7 @@ where
 import Board (advanceBoard, getPiece, mkCoords, movePiece, validMove)
 import Data.Either (fromRight)
 import Data.List
+import Data.Maybe (fromJust, isJust)
 import System.Random
 import System.Random.Shuffle (shuffle')
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
@@ -63,16 +64,21 @@ genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove gen board color =
   let (gen1, gen2) = split gen
       f ms = shuffle' ms (length ms) gen1
-      (_, m) = minimax f board color color 3 True
-   in (gen2, Just m)
+   in case minimax f board color color 3 True of
+        Nothing -> (gen2, Nothing)
+        Just (_, m) -> (gen2, Just m)
 
-minimax :: ([Move] -> [Move]) -> Board -> Color -> Color -> Int -> Bool -> (Int, Move)
+minimax :: ([(Int, Move)] -> [(Int, Move)]) -> Board -> Color -> Color -> Int -> Bool -> Maybe (Int, Move)
 minimax f board scoringColor playerColor n maximising =
   let g =
         if n == 1
-          then \m -> (scoreBoard scoringColor $ movePiece board m, m)
-          else \m -> let (s, _) = minimax f (movePiece board m) scoringColor (swapColor playerColor) (n -1) (not maximising) in (s, m)
-   in maximumBy (compareMove maximising) $ map g $ f $ genNonCheckMoves board playerColor
+          then \m -> Just (scoreBoard scoringColor $ movePiece board m, m)
+          else \m -> do
+            (s, _) <- minimax f (movePiece board m) scoringColor (swapColor playerColor) (n -1) (not maximising)
+            return (s, m)
+   in case map fromJust $ filter isJust $ map g $ genNonCheckMoves board playerColor of
+        [] -> Nothing
+        ms -> Just $ maximumBy (compareMove maximising) $ f ms
 
 compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
 compareMove maximising (s1, _) (s2, _) = if maximising then compare s1 s2 else compare s2 s1
