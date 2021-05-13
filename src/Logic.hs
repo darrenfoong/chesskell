@@ -25,11 +25,6 @@ scoreColorPiece :: Color -> CPiece -> Int
 scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
 scoreColorPiece _ Null = 0
 
-scoreBoardCenter :: Color -> Board -> Int
-scoreBoardCenter color board =
-  let centerPieces = [getPiece board (c, r) | c <- [3 .. 6], r <- [3 .. 6]]
-   in (sum . map (scoreColorPiece color)) centerPieces
-
 scorePiece :: CPiece -> Int
 scorePiece (CP _ King) = 0
 scorePiece (CP _ Queen) = 9
