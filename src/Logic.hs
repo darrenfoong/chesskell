@@ -12,7 +12,6 @@ import Board (advanceBoard, getPiece, mkCoords, movePiece, validMove)
 import Data.Either (fromRight)
 import Data.List
 import Data.Maybe (fromJust, isJust)
-import GHC.Arr ((!))
 import System.Random
 import System.Random.Shuffle (shuffle')
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
@@ -59,6 +58,7 @@ getKingPosition color board = case filter (\p -> getPiece board p == CP color Ki
 promotePawn :: [CPiece] -> [CPiece]
 promotePawn [] = []
 promotePawn (CP color Pawn : ps) = CP color Queen : promotePawn ps
+promotePawn (p : ps) = p : promotePawn ps
 
 promotePawns :: Board -> Board
 promotePawns board =
