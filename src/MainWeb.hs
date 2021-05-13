@@ -11,7 +11,7 @@ import Data.Char
 import Data.Either (fromRight)
 import Data.Maybe
 import Data.Text (Text, append, unpack)
-import Logic (genMove, isInCheck, isInCheckmate, scoreBoard)
+import Logic (genMove, isInCheck, isInCheckmate, promotePawns, scoreBoard)
 import Move (readMove, writeMove)
 import System.IO.Unsafe (unsafePerformIO)
 import System.Random
@@ -82,7 +82,9 @@ getHomeR = do
         Start -> Right mkBoard
         _ -> case mBoard of
           Nothing -> Left "ERROR: Inconsistent state; expected post parameter \"board\""
-          Just boardStr -> readBoard boardStr
+          Just boardStr -> do
+            previousBoard <- readBoard boardStr
+            return $ promotePawns previousBoard
   let color = White
 
   let ePreviousBoardWithWhite = case mPreviousWhiteMove of

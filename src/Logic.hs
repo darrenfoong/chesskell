@@ -3,6 +3,7 @@ module Logic
     genMove,
     isInCheckmate,
     isInCheck,
+    promotePawns,
     respondBoard,
   )
 where
@@ -11,6 +12,7 @@ import Board (advanceBoard, getPiece, mkCoords, movePiece, validMove)
 import Data.Either (fromRight)
 import Data.List
 import Data.Maybe (fromJust, isJust)
+import GHC.Arr ((!))
 import System.Random
 import System.Random.Shuffle (shuffle')
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
@@ -47,6 +49,16 @@ getKingPosition :: Color -> Board -> Maybe Position
 getKingPosition color board = case filter (\p -> getPiece board p == CP color King) (genPositions board color) of
   [] -> Nothing
   p : _ -> Just p
+
+promotePawn :: [CPiece] -> [CPiece]
+promotePawn [] = []
+promotePawn (CP color Pawn : ps) = CP color Queen : promotePawn ps
+
+promotePawns :: Board -> Board
+promotePawns board =
+  let firstRow = head board
+      lastRow = board !! 7
+   in promotePawn firstRow : take 6 (tail board) ++ [promotePawn lastRow]
 
 respondBoard :: StdGen -> Board -> Color -> (StdGen, Either String Board)
 respondBoard gen board color =
