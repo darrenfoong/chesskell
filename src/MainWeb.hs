@@ -82,17 +82,16 @@ getHomeR = do
         Start -> Right mkBoard
         _ -> case mBoard of
           Nothing -> Left "ERROR: Inconsistent state; expected post parameter \"board\""
-          Just boardStr -> do
-            previousBoard <- readBoard boardStr
-            return $ promotePawns previousBoard
+          Just boardStr -> readBoard boardStr
   let color = White
 
-  let ePreviousBoardWithWhite = case mPreviousWhiteMove of
-        Nothing -> ePreviousBoard
-        Just ePreviousWhiteMove -> do
-          previousWhiteMove <- ePreviousWhiteMove
-          previousBoard <- ePreviousBoard
-          advanceBoard previousBoard previousWhiteMove color
+  let ePreviousBoardWithWhite =
+        promotePawns <$> case mPreviousWhiteMove of
+          Nothing -> ePreviousBoard
+          Just ePreviousWhiteMove -> do
+            previousWhiteMove <- ePreviousWhiteMove
+            previousBoard <- ePreviousBoard
+            advanceBoard previousBoard previousWhiteMove color
 
   let gen = unsafePerformIO newStdGen -- TODO Fix this
   let emPreviousBlackMove = case state of
@@ -102,13 +101,14 @@ getHomeR = do
           let (_, mMove) = genMove gen previousBoardWithWhite $ swapColor color
            in Right mMove
         PendingMoveEnd -> Right Nothing -- TODO Carry over from previous state
-  let ePreviousBoardWithBlack = do
-        mPreviousBlackMove <- emPreviousBlackMove
-        case mPreviousBlackMove of
-          Nothing -> ePreviousBoardWithWhite
-          Just previousBlackMove -> do
-            previousBoardWithWhite <- ePreviousBoardWithWhite
-            advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color
+  let ePreviousBoardWithBlack =
+        promotePawns <$> do
+          mPreviousBlackMove <- emPreviousBlackMove
+          case mPreviousBlackMove of
+            Nothing -> ePreviousBoardWithWhite
+            Just previousBlackMove -> do
+              previousBoardWithWhite <- ePreviousBoardWithWhite
+              advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color
 
   let mPreviousBlackMove = fromRight Nothing emPreviousBlackMove
   let mErr = either Just (const Nothing) ePreviousBoardWithBlack
