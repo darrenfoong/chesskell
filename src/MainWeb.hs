@@ -70,7 +70,7 @@ getHomeR = do
 
   let state = getState mStart mPosition
 
-  let mPreviousWhiteMove = case state of
+  let mWhiteMove = case state of
         Start -> Nothing
         PendingMoveStart -> do
           start <- mStart
@@ -86,7 +86,7 @@ getHomeR = do
   let color = White
 
   let ePreviousBoardWithWhite =
-        promotePawns <$> case mPreviousWhiteMove of
+        promotePawns <$> case mWhiteMove of
           Nothing -> ePreviousBoard
           Just ePreviousWhiteMove -> do
             previousWhiteMove <- ePreviousWhiteMove
@@ -94,7 +94,7 @@ getHomeR = do
             advanceBoard previousBoard previousWhiteMove color
 
   let gen = unsafePerformIO newStdGen -- TODO Fix this
-  let emPreviousBlackMove = case state of
+  let emBlackMove = case state of
         Start -> Right Nothing
         PendingMoveStart -> do
           previousBoardWithWhite <- ePreviousBoardWithWhite
@@ -103,14 +103,14 @@ getHomeR = do
         PendingMoveEnd -> Right Nothing -- TODO Carry over from previous state
   let ePreviousBoardWithBlack =
         promotePawns <$> do
-          mPreviousBlackMove <- emPreviousBlackMove
+          mPreviousBlackMove <- emBlackMove
           case mPreviousBlackMove of
             Nothing -> ePreviousBoardWithWhite
             Just previousBlackMove -> do
               previousBoardWithWhite <- ePreviousBoardWithWhite
               advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color
 
-  let mPreviousBlackMove = fromRight Nothing emPreviousBlackMove
+  let mBlackMove = fromRight Nothing emBlackMove
   let mErr = either Just (const Nothing) ePreviousBoardWithBlack
   let mNextBoard = case ePreviousBoardWithBlack of
         Left _ -> either (const Nothing) Just ePreviousBoard
@@ -180,8 +180,8 @@ getHomeR = do
         <p>White: score: #{scoreBoard White nextBoard}; check: #{show (isInCheck White nextBoard)}; checkmate: #{show (isInCheckmate White nextBoard)}
         <p>Black: score: #{scoreBoard Black nextBoard}; check: #{show (isInCheck Black nextBoard)}; checkmate: #{show (isInCheckmate Black nextBoard)}
       $if state /= Start
-        $maybe previousBlackMove <- mPreviousBlackMove
-          <p>Black played: #{writeMove previousBlackMove}
+        $maybe blackMove <- mBlackMove
+          <p>Black played: #{writeMove blackMove}
       $if state /= PendingMoveEnd
         <p>Please select a piece.
       $else
