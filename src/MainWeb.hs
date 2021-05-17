@@ -67,6 +67,7 @@ getHomeR = do
   mBoard <- lookupPostParam "board"
   mPosition <- lookupPostParam "position"
   mStart <- lookupPostParam "start"
+  mPreviousBlackMove <- lookupPostParam "previousBlackMove"
 
   let state = getState mStart mPosition
 
@@ -100,17 +101,25 @@ getHomeR = do
           previousBoardWithWhite <- ePreviousBoardWithWhite
           let (_, mMove) = genMove gen previousBoardWithWhite $ swapColor color
            in Right mMove
-        PendingMoveEnd -> Right Nothing -- TODO Carry over from previous state
+        PendingMoveEnd -> Right Nothing
   let ePreviousBoardWithBlack =
         promotePawns <$> do
-          mPreviousBlackMove <- emBlackMove
-          case mPreviousBlackMove of
+          mBlackMove <- emBlackMove
+          case mBlackMove of
             Nothing -> ePreviousBoardWithWhite
-            Just previousBlackMove -> do
+            Just blackMove -> do
               previousBoardWithWhite <- ePreviousBoardWithWhite
-              advanceBoard previousBoardWithWhite previousBlackMove $ swapColor color
+              advanceBoard previousBoardWithWhite blackMove $ swapColor color
 
-  let mBlackMove = fromRight Nothing emBlackMove
+  let mBlackMove = case emBlackMove of
+        Left _ -> Nothing
+        Right mMove -> case mMove of
+          Nothing -> case mPreviousBlackMove of
+            Nothing -> Nothing
+            Just previousBlackMove -> case readMove $ unpack previousBlackMove of
+              Left _ -> Nothing
+              Right blackMove -> Just blackMove
+          Just move -> Just move
   let mErr = either Just (const Nothing) ePreviousBoardWithBlack
   let mNextBoard = case ePreviousBoardWithBlack of
         Left _ -> either (const Nothing) Just ePreviousBoard
@@ -198,6 +207,8 @@ getHomeR = do
         $if state == PendingMoveEnd
           $maybe position <- mPosition
             <input type="hidden" name="start" value="#{position}">
+        $maybe blackMove <- mBlackMove
+          <input type="hidden" name="previousBlackMove" value="#{writeMove blackMove}">
         $maybe nextBoard <- mNextBoard
           <div id="board">
             $forall r <- rs
