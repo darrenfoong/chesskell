@@ -12,7 +12,6 @@ import Data.Maybe
 import Data.Text (Text, append, unpack)
 import Logic (genMove, isInCheck, isInCheckmate, promotePawns, scoreBoard)
 import Move (readMove, writeMove)
-import System.IO.Unsafe (unsafePerformIO)
 import System.Random
 import Types (Color (..), swapColor)
 import Yesod
@@ -93,7 +92,8 @@ getHomeR = do
             previousBoard <- ePreviousBoard
             advanceBoard previousBoard previousWhiteMove color
 
-  let gen = unsafePerformIO newStdGen -- TODO Fix this
+  gen <- liftIO newStdGen
+
   let emBlackMove = case state of
         Start -> Right Nothing
         PendingMoveStart -> do
