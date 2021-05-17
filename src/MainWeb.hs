@@ -8,7 +8,6 @@
 
 import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, readBoard, writeBoard)
 import Data.Char
-import Data.Either (fromRight)
 import Data.Maybe
 import Data.Text (Text, append, unpack)
 import Logic (genMove, isInCheck, isInCheckmate, promotePawns, scoreBoard)
