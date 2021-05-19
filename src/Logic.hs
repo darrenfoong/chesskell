@@ -76,12 +76,13 @@ respondBoard gen board color =
 genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove gen board color =
   let (gen1, gen2) = split gen
-      f ms = shuffle' ms (length ms) gen1
-   in case minimax f board color color 3 True of
+      f [] = []
+      f ms = take 15 $ shuffle' ms (length ms) gen1
+   in case minimax f board color color 4 True of
         Nothing -> (gen2, Nothing)
         Just (_, m) -> (gen2, Just m)
 
-minimax :: ([(Int, Move)] -> [(Int, Move)]) -> Board -> Color -> Color -> Int -> Bool -> Maybe (Int, Move)
+minimax :: ([Move] -> [Move]) -> Board -> Color -> Color -> Int -> Bool -> Maybe (Int, Move)
 minimax f board scoringColor playerColor n maximising =
   let g =
         if n == 1
@@ -89,9 +90,9 @@ minimax f board scoringColor playerColor n maximising =
           else \m -> do
             (s, _) <- minimax f (movePiece board m) scoringColor (swapColor playerColor) (n -1) (not maximising)
             return (s, m)
-   in case map fromJust $ filter isJust $ map g $ genNonCheckMoves board playerColor of
+   in case map fromJust $ filter isJust $ map g $ f $ genNonCheckMoves board playerColor of
         [] -> Nothing
-        ms -> Just $ maximumBy (compareMove maximising) $ f ms
+        ms -> Just $ maximumBy (compareMove maximising) ms
 
 compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
 compareMove maximising (s1, _) (s2, _) = if maximising then compare s1 s2 else compare s2 s1
