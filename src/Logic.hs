@@ -19,7 +19,7 @@ posInfinity :: Int
 posInfinity = 100000
 
 negInfinity :: Int
-negInfinity = (-posInfinity)
+negInfinity = (- posInfinity)
 
 scoreBoard :: Color -> Board -> Int
 scoreBoard color board = scoreBoardInner color board - scoreBoardInner (swapColor color) board
@@ -89,31 +89,35 @@ genMove gen board color =
 
 minimax :: ([Move] -> [Move]) -> Board -> Color -> Color -> Int -> Int -> Int -> Bool -> Maybe (Int, Move)
 minimax f board scoringColor playerColor n alpha beta maximising =
-  let g _ _ _ [] = []
-      g a b previousBestScore (m : ms) =
+  let g _ _ mPreviousBestMove previousBestScore [] = do
+        previousBestMove <- mPreviousBestMove
+        Just (previousBestScore, previousBestMove)
+      g a b mPreviousBestMove previousBestScore (m : ms) =
         if n == 1
-          then (scoreBoard scoringColor $ movePiece board m, m) : g a b previousBestScore ms
+          then
+            let s = scoreBoard scoringColor $ movePiece board m
+             in if s >= previousBestScore
+                  then g a b (Just m) s ms
+                  else g a b mPreviousBestMove previousBestScore ms
           else do
             case minimax f (movePiece board m) scoringColor (swapColor playerColor) (n -1) a b (not maximising) of
-              Nothing -> g a b previousBestScore ms
+              Nothing -> g a b mPreviousBestMove previousBestScore ms
               Just (s, _) ->
                 if maximising
                   then
                     let currentBestScore = max previousBestScore s
                         newA = max a currentBestScore
                      in if newA >= b
-                          then g newA b currentBestScore ms
-                          else (s, m) : g newA b currentBestScore ms
+                          then Just (currentBestScore, m)
+                          else g newA b mPreviousBestMove previousBestScore ms
                   else
                     let currentBestScore = min previousBestScore s
                         newB = min b currentBestScore
                      in if newB <= a
-                          then g a newB currentBestScore ms
-                          else (s, m) : g a newB currentBestScore ms
+                          then Just (currentBestScore, m)
+                          else g a newB mPreviousBestMove previousBestScore ms
       initialBestScore = if maximising then negInfinity else posInfinity
-   in case g alpha beta initialBestScore $ f $ genNonCheckMoves board playerColor of
-        [] -> Nothing
-        ms -> Just $ maximumBy (compareMove maximising) ms
+   in g alpha beta Nothing initialBestScore $ f $ genNonCheckMoves board playerColor
 
 compareMove :: Bool -> (Int, Move) -> (Int, Move) -> Ordering
 compareMove maximising (s1, _) (s2, _) = if maximising then compare s1 s2 else compare s2 s1
