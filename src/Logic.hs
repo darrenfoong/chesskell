@@ -84,17 +84,17 @@ genMove gen board color =
 
 minimax :: ([Move] -> [Move]) -> Board -> Color -> Color -> Int -> Int -> Int -> Bool -> Maybe (Int, Move)
 minimax f board scoringColor playerColor n alpha beta maximising =
-  let g [] = []
-      g (m : ms) =
+  let g _ _ [] = []
+      g alpha beta (m : ms) =
         if n == 1
-          then Just (scoreBoard scoringColor $ movePiece board m, m) : g ms
+          then Just (scoreBoard scoringColor $ movePiece board m, m) : g alpha beta ms
           else
             ( do
                 (s, _) <- minimax f (movePiece board m) scoringColor (swapColor playerColor) (n -1) alpha beta (not maximising)
                 return (s, m)
             ) :
-            g ms
-   in case map fromJust $ filter isJust $ g $ f $ genNonCheckMoves board playerColor of
+            g alpha beta ms
+   in case map fromJust $ filter isJust $ g alpha beta $ f $ genNonCheckMoves board playerColor of
         [] -> Nothing
         ms -> Just $ maximumBy (compareMove maximising) ms
 
