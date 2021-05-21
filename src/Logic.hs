@@ -18,7 +18,7 @@ posInfinity :: Int
 posInfinity = 100000
 
 negInfinity :: Int
-negInfinity = (- posInfinity)
+negInfinity = - posInfinity
 
 scoreBoard :: Color -> Board -> Int
 scoreBoard color board = scoreBoardInner color board - scoreBoardInner (swapColor color) board
@@ -26,11 +26,17 @@ scoreBoard color board = scoreBoardInner color board - scoreBoardInner (swapColo
 scoreBoardInner :: Color -> Board -> Int
 scoreBoardInner color board =
   (sum . map (sum . map (scoreColorPiece color))) board
+    + 2 * scoreBoardCenter color board
     + if isInCheck color board
       then -100
       else
         0
           + if isInCheckmate color board then -1000 else 0
+
+scoreBoardCenter :: Color -> Board -> Int
+scoreBoardCenter color board =
+  let centerPieces = [getPiece board (c, r) | c <- [3 .. 6], r <- [3 .. 6]]
+   in (sum . map (scoreColorPiece color)) centerPieces
 
 scoreColorPiece :: Color -> CPiece -> Int
 scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
@@ -82,7 +88,7 @@ genMove gen board color =
   let (gen1, gen2) = split gen
       f [] = []
       f ms = shuffle' ms (length ms) gen1
-   in case minimax f board color color 1 negInfinity posInfinity True of
+   in case minimax f board color color 3 negInfinity posInfinity True of
         (_, _, Nothing) -> (gen2, Nothing)
         (_, _, Just (_, m)) -> (gen2, Just m)
 
@@ -91,6 +97,9 @@ minimax f board scoringColor playerColor n alpha beta maximising =
   let g a b mPreviousBestMove previousBestScore [] = case mPreviousBestMove of
         Nothing -> (a, b, Nothing)
         Just previousBestMove -> (a, b, Just (previousBestScore, previousBestMove))
+      g a b Nothing _ [m] =
+        let s = scoreBoard scoringColor $ movePiece board m
+         in (a, b, Just (s, m))
       g a b mPreviousBestMove previousBestScore (m : ms) =
         if n == 1
           then
