@@ -88,7 +88,7 @@ genMove gen board color =
   let (gen1, gen2) = split gen
       f [] = []
       f ms = shuffle' ms (length ms) gen1
-   in case minimax f board color color 100 negInfinity posInfinity True of
+   in case minimax f board color color 3 negInfinity posInfinity True of
         (_, _, Nothing) -> (gen2, Nothing)
         (_, _, Just (_, m)) -> (gen2, Just m)
 
@@ -97,23 +97,27 @@ compareScoreMove f (s1, m1) (s2, m2) = if f s1 s2 then (s1, m1) else (s2, m2)
 
 minimax :: ([Move] -> [Move]) -> Board -> Color -> Color -> Int -> Int -> Int -> Bool -> (Int, Int, Maybe (Int, Move))
 minimax f board scoringColor playerColor n alpha beta maximising =
-  let h a b maximising' s m previousBestScore mPreviousBestMove ms =
+  let extractMove a b previousBestScore mPreviousBestMove = case mPreviousBestMove of
+        Nothing -> (a, b, Nothing)
+        Just previousBestMove -> (a, b, Just (previousBestScore, previousBestMove))
+      h a b maximising' s m previousBestScore mPreviousBestMove ms =
         if maximising'
           then
             let (currentBestScore, mCurrentBestMove) = compareScoreMove (>=) (s, Just m) (previousBestScore, mPreviousBestMove)
                 updatedA = max a currentBestScore
              in if updatedA >= b
-                  then (updatedA, b, Just (currentBestScore, m))
+                  then extractMove updatedA b previousBestScore mPreviousBestMove
                   else g updatedA b mCurrentBestMove currentBestScore ms
           else
             let (currentBestScore, mCurrentBestMove) = compareScoreMove (<=) (s, Just m) (previousBestScore, mPreviousBestMove)
                 updatedB = min b currentBestScore
              in if updatedB <= a
-                  then (a, updatedB, Just (currentBestScore, m))
+                  then extractMove a updatedB previousBestScore mPreviousBestMove
                   else g a updatedB mCurrentBestMove currentBestScore ms
-      g a b mPreviousBestMove previousBestScore [] = case mPreviousBestMove of
-        Nothing -> (a, b, Nothing)
-        Just previousBestMove -> (a, b, Just (previousBestScore, previousBestMove))
+      g a b mPreviousBestMove previousBestScore [] = extractMove a b previousBestScore mPreviousBestMove
+      g a b Nothing _ [m] =
+        let s = scoreBoard scoringColor $ movePiece board m
+         in (a, b, Just (s, m))
       g a b mPreviousBestMove previousBestScore (m : ms) =
         if n == 1
           then
