@@ -88,7 +88,7 @@ genMove gen board color =
   let (gen1, gen2) = split gen
       f [] = []
       f ms = shuffle' ms (length ms) gen1
-   in case minimax f board color color 1 negInfinity posInfinity True of
+   in case minimax f board color color 3 negInfinity posInfinity True of
         (_, _, Nothing) -> (gen2, Nothing)
         (_, _, Just (_, m)) -> (gen2, Just m)
 
@@ -106,13 +106,13 @@ minimax f board scoringColor playerColor n alpha beta maximising =
             let (currentBestScore, mCurrentBestMove) = compareScoreMove (>=) (s, Just m) (previousBestScore, mPreviousBestMove)
                 updatedA = max a currentBestScore
              in if updatedA >= b
-                  then extractMove updatedA b previousBestScore mPreviousBestMove
+                  then extractMove updatedA b currentBestScore mCurrentBestMove
                   else g updatedA b currentBestScore mCurrentBestMove ms
           else
             let (currentBestScore, mCurrentBestMove) = compareScoreMove (<=) (s, Just m) (previousBestScore, mPreviousBestMove)
                 updatedB = min b currentBestScore
              in if updatedB <= a
-                  then extractMove a updatedB previousBestScore mPreviousBestMove
+                  then extractMove a updatedB currentBestScore mCurrentBestMove
                   else g a updatedB currentBestScore mCurrentBestMove ms
       g a b previousBestScore mPreviousBestMove [] = extractMove a b previousBestScore mPreviousBestMove
       g a b _ Nothing [m] =
