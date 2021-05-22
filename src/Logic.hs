@@ -82,7 +82,7 @@ genMove gen board color =
   let (gen1, gen2) = split gen
       f [] = []
       f ms = shuffle' ms (length ms) gen1
-   in case minimax f board color color 3 negInfinity posInfinity True of
+   in case minimax f board color color 4 negInfinity posInfinity True of
         Nothing -> (gen2, Nothing)
         Just (_, m) -> (gen2, Just m)
 
