@@ -125,8 +125,8 @@ minimax f board scoringColor playerColor n alpha beta maximising =
              in h a b maximising s m previousBestScore mPreviousBestMove ms
           else do
             case minimax f (movePiece board m) scoringColor (swapColor playerColor) (n -1) a b (not maximising) of
-              (newA, newB, Nothing) -> g newA newB previousBestScore mPreviousBestMove ms
-              (newA, newB, Just (s, _)) -> h newA newB maximising s m previousBestScore mPreviousBestMove ms
+              (newA, newB, Nothing) -> g a b previousBestScore mPreviousBestMove ms
+              (newA, newB, Just (s, _)) -> h a b maximising s m previousBestScore mPreviousBestMove ms
       initialBestScore = if maximising then negInfinity else posInfinity
    in g alpha beta initialBestScore Nothing $ f $ genNonCheckMoves board playerColor
 
