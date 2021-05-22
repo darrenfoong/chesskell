@@ -26,17 +26,11 @@ scoreBoard color board = scoreBoardInner color board - scoreBoardInner (swapColo
 scoreBoardInner :: Color -> Board -> Int
 scoreBoardInner color board =
   (sum . map (sum . map (scoreColorPiece color))) board
-    + 2 * scoreBoardCenter color board
     + if isInCheck color board
       then -100
       else
         0
           + if isInCheckmate color board then -1000 else 0
-
-scoreBoardCenter :: Color -> Board -> Int
-scoreBoardCenter color board =
-  let centerPieces = [getPiece board (c, r) | c <- [3 .. 6], r <- [3 .. 6]]
-   in (sum . map (scoreColorPiece color)) centerPieces
 
 scoreColorPiece :: Color -> CPiece -> Int
 scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0
