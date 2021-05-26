@@ -11,8 +11,8 @@ where
 import Board (advanceBoard, getPiece, mkCoords, movePiece, validMove)
 import Data.Either (fromRight)
 import System.Random
-import System.Random.Shuffle (shuffle')
 import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
+import Utils (shuffle)
 
 posInfinity :: Int
 posInfinity = 100000
@@ -80,9 +80,7 @@ respondBoard gen board color =
 genMove :: StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove gen board color =
   let (gen1, gen2) = split gen
-      f [] = []
-      f ms = shuffle' ms (length ms) gen1
-   in case minimax f board color color 4 negInfinity posInfinity True of
+   in case minimax (shuffle gen1) board color color 4 negInfinity posInfinity True of
         Nothing -> (gen2, Nothing)
         Just (_, m) -> (gen2, Just m)
 

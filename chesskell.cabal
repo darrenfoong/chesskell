@@ -13,7 +13,8 @@ executable chesskell
                        Board,
                        Position,
                        Move,
-                       Logic
+                       Logic,
+                       Utils
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base,
                        random,
@@ -28,7 +29,8 @@ executable chesskell-web
                        Board,
                        Position,
                        Move,
-                       Logic
+                       Logic,
+                       Utils
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base,
                        random,
@@ -44,7 +46,8 @@ library
                        Board,
                        Position,
                        Move,
-                       Logic
+                       Logic,
+                       Utils
   build-depends:       base,
                        random,
                        random-shuffle,
