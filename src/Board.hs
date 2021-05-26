@@ -4,14 +4,14 @@ module Board
     prettyPrintPiece,
     readBoard,
     writeBoard,
-    advanceBoard,
-    movePiece,
     getPiece,
+    movePiece,
+    advanceBoard,
     getPositions,
     getKingPosition,
-    promotePawns,
-    isPositionUnderAttack,
     genPossibleMoves,
+    isPositionUnderAttack,
+    promotePawns,
   )
 where
 
@@ -118,17 +118,6 @@ readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
 writeBoard :: Board -> String
 writeBoard = concatMap printRow
 
-promotePawn :: [CPiece] -> [CPiece]
-promotePawn [] = []
-promotePawn (CP color Pawn : ps) = CP color Queen : promotePawn ps
-promotePawn (p : ps) = p : promotePawn ps
-
-promotePawns :: Board -> Board
-promotePawns board =
-  let firstRow = head board
-      lastRow = board !! 7
-   in promotePawn firstRow : take 6 (tail board) ++ [promotePawn lastRow]
-
 isValidMove :: Board -> Move -> Color -> Bool
 isValidMove board (start, end) color =
   start /= end
@@ -160,10 +149,8 @@ checkLineOfSight board (CP _ Pawn) ((sc, sr), (_, er))
   | (er - sr) == -2 = checkLineOfSightPos board [(sc, sr -1)]
   | otherwise = True
 
-movePiece :: Board -> Move -> Board
-movePiece board (start, end) =
-  let (intermediateBoard, oldPiece) = removePiece board start
-   in setPiece intermediateBoard end oldPiece
+checkLineOfSightPos :: Board -> [Position] -> Bool
+checkLineOfSightPos board = all (\p -> getPiece board p == Null)
 
 alterBoardRow :: Board -> Int -> ([CPiece] -> ([CPiece], CPiece)) -> (Board, CPiece)
 alterBoardRow [] _ _ = ([], Null)
@@ -192,8 +179,10 @@ setPiece board (cn, rn) piece =
 removePiece :: Board -> Position -> (Board, CPiece)
 removePiece board (cn, rn) = alterBoardRow board rn (\r -> alterRow r cn (const Null))
 
-checkLineOfSightPos :: Board -> [Position] -> Bool
-checkLineOfSightPos board = all (\p -> getPiece board p == Null)
+movePiece :: Board -> Move -> Board
+movePiece board (start, end) =
+  let (intermediateBoard, oldPiece) = removePiece board start
+   in setPiece intermediateBoard end oldPiece
 
 advanceBoard :: Board -> Move -> Color -> Either String Board
 advanceBoard board move color =
@@ -226,3 +215,14 @@ genPossibleMoves board color = concatMap (genPossibleMovesPiece board) (getPosit
 
 isPositionUnderAttack :: Color -> Board -> Position -> Bool
 isPositionUnderAttack color board pos = elem pos $ map snd $ genPossibleMoves board $ swapColor color
+
+promotePawn :: [CPiece] -> [CPiece]
+promotePawn [] = []
+promotePawn (CP color Pawn : ps) = CP color Queen : promotePawn ps
+promotePawn (p : ps) = p : promotePawn ps
+
+promotePawns :: Board -> Board
+promotePawns board =
+  let firstRow = head board
+      lastRow = board !! 7
+   in promotePawn firstRow : take 6 (tail board) ++ [promotePawn lastRow]

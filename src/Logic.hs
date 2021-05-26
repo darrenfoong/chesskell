@@ -1,8 +1,7 @@
 module Logic
-  ( genMove,
-    isInCheckmate,
+  ( isInCheckmate,
     isInCheck,
-    respondBoard,
+    genMove,
   )
 where
 
@@ -18,13 +17,6 @@ isInCheckmate color board = all (isInCheck color) ((:) board $ map snd $ genNext
 
 isInCheck :: Color -> Board -> Bool
 isInCheck color board = maybe False (isPositionUnderAttack color board) (getKingPosition color board)
-
-respondBoard :: (Color -> Board -> Int) -> StdGen -> Board -> Color -> (StdGen, Either String Board)
-respondBoard boardScorer gen board color =
-  let (newGen, mMove) = genMove boardScorer gen board color
-   in case mMove of
-        Just m -> (newGen, advanceBoard board m color)
-        Nothing -> (newGen, Left "ERROR: Program has made an invalid move")
 
 genMove :: (Color -> Board -> Int) -> StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove boardScorer gen board color =
