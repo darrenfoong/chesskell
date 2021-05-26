@@ -118,8 +118,8 @@ readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
 writeBoard :: Board -> String
 writeBoard = concatMap printRow
 
-isValidMove :: Board -> Move -> Color -> Bool
-isValidMove board (start, end) color =
+isValidMove :: Board -> Color -> Move -> Bool
+isValidMove board color (start, end) =
   start /= end
     && let startPiece = getPiece board start
         in case startPiece of
@@ -184,9 +184,9 @@ movePiece board (start, end) =
   let (intermediateBoard, oldPiece) = removePiece board start
    in setPiece intermediateBoard end oldPiece
 
-advanceBoard :: Board -> Move -> Color -> Either String Board
-advanceBoard board move color =
-  if isValidMove board move color
+advanceBoard :: Board -> Color -> Move -> Either String Board
+advanceBoard board color move =
+  if isValidMove board color move
     then Right $ movePiece board move
     else Left $ "ERROR: Invalid move: " ++ show move
 
@@ -200,21 +200,21 @@ getPositions board color =
     []
     mkCoords
 
-getKingPosition :: Color -> Board -> Maybe Position
-getKingPosition color board = case filter (\p -> getPiece board p == CP color King) (getPositions board color) of
+getKingPosition :: Board -> Color -> Maybe Position
+getKingPosition board color = case filter (\p -> getPiece board p == CP color King) (getPositions board color) of
   [] -> Nothing
   p : _ -> Just p
 
 genPossibleMovesPiece :: Board -> Position -> [Move]
 genPossibleMovesPiece board position = case getPiece board position of
-  CP color _ -> filter (\move -> isValidMove board move color) (map (\pos -> (position, pos)) mkCoords)
+  CP color _ -> filter (isValidMove board color) (map (\pos -> (position, pos)) mkCoords)
   _ -> []
 
 genPossibleMoves :: Board -> Color -> [Move]
 genPossibleMoves board color = concatMap (genPossibleMovesPiece board) (getPositions board color)
 
-isPositionUnderAttack :: Color -> Board -> Position -> Bool
-isPositionUnderAttack color board pos = elem pos $ map snd $ genPossibleMoves board $ swapColor color
+isPositionUnderAttack :: Board -> Color -> Position -> Bool
+isPositionUnderAttack board color pos = elem pos $ map snd $ genPossibleMoves board $ swapColor color
 
 promotePawn :: [CPiece] -> [CPiece]
 promotePawn [] = []

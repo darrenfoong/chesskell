@@ -6,17 +6,17 @@ where
 import Logic (isInCheck, isInCheckmate)
 import Types (Board, CPiece (..), Color (..), Piece (..), swapColor)
 
-scoreBoard :: Color -> Board -> Int
-scoreBoard color board = scoreBoardInner color board - scoreBoardInner (swapColor color) board
+scoreBoard :: Board -> Color -> Int
+scoreBoard board color = scoreBoardInner board color - scoreBoardInner board (swapColor color)
 
-scoreBoardInner :: Color -> Board -> Int
-scoreBoardInner color board =
+scoreBoardInner :: Board -> Color -> Int
+scoreBoardInner board color =
   (sum . map (sum . map (scoreColorPiece color))) board
-    + if isInCheck color board
+    + if isInCheck board color
       then -100
       else
         0
-          + if isInCheckmate color board then -1000 else 0
+          + if isInCheckmate board color then -1000 else 0
 
 scoreColorPiece :: Color -> CPiece -> Int
 scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p else 0

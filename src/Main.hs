@@ -23,15 +23,15 @@ loopBoard gen board color = forever $ do
 loopBoardInner :: StdGen -> Board -> Color -> String -> Either String (StdGen, Board)
 loopBoardInner gen board color moveStr = do
   move <- readMove moveStr
-  advancedBoard <- advanceBoard board move color
+  advancedBoard <- advanceBoard board color move
   let (newGen, mBoard) = respondBoard scoreBoard gen advancedBoard $ swapColor color
    in do
         respondedBoard <- mBoard
         return (newGen, respondedBoard)
 
-respondBoard :: (Color -> Board -> Int) -> StdGen -> Board -> Color -> (StdGen, Either String Board)
+respondBoard :: (Board -> Color -> Int) -> StdGen -> Board -> Color -> (StdGen, Either String Board)
 respondBoard boardScorer gen board color =
   let (newGen, mMove) = genMove boardScorer gen board color
    in case mMove of
-        Just m -> (newGen, advanceBoard board m color)
+        Just m -> (newGen, advanceBoard board color m)
         Nothing -> (newGen, Left "ERROR: Program has made an invalid move")

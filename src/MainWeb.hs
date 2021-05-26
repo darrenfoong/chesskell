@@ -91,7 +91,7 @@ getHomeR = do
           Just ePreviousWhiteMove -> do
             previousWhiteMove <- ePreviousWhiteMove
             previousBoard <- ePreviousBoard
-            advanceBoard previousBoard previousWhiteMove color
+            advanceBoard previousBoard color previousWhiteMove
 
   gen <- liftIO newStdGen
 
@@ -109,7 +109,7 @@ getHomeR = do
             Nothing -> ePreviousBoardWithWhite
             Just blackMove -> do
               previousBoardWithWhite <- ePreviousBoardWithWhite
-              advanceBoard previousBoardWithWhite blackMove $ swapColor color
+              advanceBoard previousBoardWithWhite (swapColor color) blackMove
 
   let mBlackMove = case emBlackMove of
         Left _ -> Nothing
@@ -186,8 +186,8 @@ getHomeR = do
       <p>State: #{show state}
       <p>You are White.
       $maybe nextBoard <- mNextBoard
-        <p>White: score: #{scoreBoard White nextBoard}; check: #{show (isInCheck White nextBoard)}; checkmate: #{show (isInCheckmate White nextBoard)}
-        <p>Black: score: #{scoreBoard Black nextBoard}; check: #{show (isInCheck Black nextBoard)}; checkmate: #{show (isInCheckmate Black nextBoard)}
+        <p>White: score: #{scoreBoard nextBoard White}; check: #{show (isInCheck nextBoard White)}; checkmate: #{show (isInCheckmate nextBoard White)}
+        <p>Black: score: #{scoreBoard nextBoard Black}; check: #{show (isInCheck nextBoard Black)}; checkmate: #{show (isInCheckmate nextBoard Black)}
       $if state /= Start
         $maybe blackMove <- mBlackMove
           <p>Black played: #{writeMove blackMove}
