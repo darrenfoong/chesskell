@@ -1,7 +1,7 @@
 module Move
   ( readMove,
     writeMove,
-    validMovePiece,
+    isValidMovePiece,
   )
 where
 
@@ -23,30 +23,30 @@ writeMove ((sc, sr), (ec, er)) =
   let f n = chr $ ord 'a' + n - 1
    in [f sc, intToDigit sr, f ec, intToDigit er]
 
-validMovePiece :: CPiece -> Bool -> Move -> Bool
-validMovePiece (CP Black Pawn) False ((sc, sr), (ec, er)) =
+isValidMovePiece :: CPiece -> Bool -> Move -> Bool
+isValidMovePiece (CP Black Pawn) False ((sc, sr), (ec, er)) =
   let cdiff = ec - sc
       rdiff = er - sr
    in cdiff == 0 && (rdiff == (-1) || (sr == 7 && rdiff == (-2)))
-validMovePiece (CP White Pawn) False ((sc, sr), (ec, er)) =
+isValidMovePiece (CP White Pawn) False ((sc, sr), (ec, er)) =
   let cdiff = ec - sc
       rdiff = er - sr
    in cdiff == 0 && (rdiff == 1 || (sr == 2 && rdiff == 2))
-validMovePiece piece attack ((sc, sr), (ec, er)) = validMovePieceInner piece attack (ec - sc, er - sr)
+isValidMovePiece piece attack ((sc, sr), (ec, er)) = isValidMovePieceInner piece attack (ec - sc, er - sr)
 
-validMovePieceInner :: CPiece -> Bool -> (Int, Int) -> Bool
-validMovePieceInner (CP _ King) _ (cdiff, rdiff) =
+isValidMovePieceInner :: CPiece -> Bool -> (Int, Int) -> Bool
+isValidMovePieceInner (CP _ King) _ (cdiff, rdiff) =
   (cdiff == 0 && abs rdiff == 1)
     || (rdiff == 0 && abs cdiff == 1)
     || (abs cdiff == abs rdiff && abs cdiff == 1)
-validMovePieceInner (CP color Queen) attack move =
-  validMovePieceInner (CP color Rook) attack move
-    || validMovePieceInner (CP color Bishop) attack move
-validMovePieceInner (CP _ Rook) _ (cdiff, rdiff) = cdiff == 0 || rdiff == 0
-validMovePieceInner (CP _ Bishop) _ (cdiff, rdiff) = abs cdiff == abs rdiff
-validMovePieceInner (CP _ Knight) _ (cdiff, rdiff) =
+isValidMovePieceInner (CP color Queen) attack move =
+  isValidMovePieceInner (CP color Rook) attack move
+    || isValidMovePieceInner (CP color Bishop) attack move
+isValidMovePieceInner (CP _ Rook) _ (cdiff, rdiff) = cdiff == 0 || rdiff == 0
+isValidMovePieceInner (CP _ Bishop) _ (cdiff, rdiff) = abs cdiff == abs rdiff
+isValidMovePieceInner (CP _ Knight) _ (cdiff, rdiff) =
   (abs cdiff == 1 && abs rdiff == 2)
     || (abs cdiff == 2 && abs rdiff == 1)
-validMovePieceInner (CP Black Pawn) True (cdiff, rdiff) = abs cdiff == 1 && rdiff == (-1)
-validMovePieceInner (CP White Pawn) True (cdiff, rdiff) = abs cdiff == 1 && rdiff == 1
-validMovePieceInner _ _ _ = False
+isValidMovePieceInner (CP Black Pawn) True (cdiff, rdiff) = abs cdiff == 1 && rdiff == (-1)
+isValidMovePieceInner (CP White Pawn) True (cdiff, rdiff) = abs cdiff == 1 && rdiff == 1
+isValidMovePieceInner _ _ _ = False

@@ -1,4 +1,9 @@
-module Minimax (minimax, posInfinity, negInfinity) where
+module Minimax
+  ( posInfinity,
+    negInfinity,
+    minimax,
+  )
+where
 
 import Board (movePiece)
 import Types (Board, Color (..), Move, swapColor)

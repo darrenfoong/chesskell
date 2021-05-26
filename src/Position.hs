@@ -1,7 +1,6 @@
 module Position
   ( mkPosition,
     mkPositions,
-    mkPositionsInner,
     isValidPosition,
   )
 where

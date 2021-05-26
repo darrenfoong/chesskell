@@ -1,4 +1,7 @@
-module Scoring (scoreBoard) where
+module Scoring
+  ( scoreBoard,
+  )
+where
 
 import Logic (isInCheck, isInCheckmate)
 import Types (Board, CPiece (..), Color (..), Piece (..), swapColor)

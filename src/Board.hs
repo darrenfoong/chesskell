@@ -1,7 +1,5 @@
 module Board
   ( mkBoard,
-    mkPosition,
-    mkCoords,
     printBoard,
     prettyPrintPiece,
     readBoard,
@@ -9,14 +7,18 @@ module Board
     advanceBoard,
     movePiece,
     getPiece,
-    validMove,
+    getPositions,
+    getKingPosition,
+    promotePawns,
+    isPositionUnderAttack,
+    genPossibleMoves,
   )
 where
 
 import Data.Text (Text, chunksOf, unpack)
-import Move (validMovePiece)
-import Position (mkPosition, mkPositions)
-import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position)
+import Move (isValidMovePiece)
+import Position (mkPositions)
+import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
 
 mkBoard :: Board
 mkBoard =
@@ -116,8 +118,19 @@ readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
 writeBoard :: Board -> String
 writeBoard = concatMap printRow
 
-validMove :: Board -> Move -> Color -> Bool
-validMove board (start, end) color =
+promotePawn :: [CPiece] -> [CPiece]
+promotePawn [] = []
+promotePawn (CP color Pawn : ps) = CP color Queen : promotePawn ps
+promotePawn (p : ps) = p : promotePawn ps
+
+promotePawns :: Board -> Board
+promotePawns board =
+  let firstRow = head board
+      lastRow = board !! 7
+   in promotePawn firstRow : take 6 (tail board) ++ [promotePawn lastRow]
+
+isValidMove :: Board -> Move -> Color -> Bool
+isValidMove board (start, end) color =
   start /= end
     && let startPiece = getPiece board start
         in case startPiece of
@@ -125,11 +138,11 @@ validMove board (start, end) color =
                startColor == color
                  && case getPiece board end of
                    Null ->
-                     validMovePiece startPiece False (start, end)
+                     isValidMovePiece startPiece False (start, end)
                        && checkLineOfSight board startPiece (start, end)
                    CP endColor _ ->
                      startColor /= endColor
-                       && validMovePiece startPiece True (start, end)
+                       && isValidMovePiece startPiece True (start, end)
                        && checkLineOfSight board startPiece (start, end)
              Null -> False
 
@@ -184,6 +197,32 @@ checkLineOfSightPos board = all (\p -> getPiece board p == Null)
 
 advanceBoard :: Board -> Move -> Color -> Either String Board
 advanceBoard board move color =
-  if validMove board move color
+  if isValidMove board move color
     then Right $ movePiece board move
     else Left $ "ERROR: Invalid move: " ++ show move
+
+getPositions :: Board -> Color -> [Position]
+getPositions board color =
+  foldl
+    ( \ps p -> case getPiece board p of
+        CP clr _ -> if color == clr then p : ps else ps
+        _ -> ps
+    )
+    []
+    mkCoords
+
+getKingPosition :: Color -> Board -> Maybe Position
+getKingPosition color board = case filter (\p -> getPiece board p == CP color King) (getPositions board color) of
+  [] -> Nothing
+  p : _ -> Just p
+
+genPossibleMovesPiece :: Board -> Position -> [Move]
+genPossibleMovesPiece board position = case getPiece board position of
+  CP color _ -> filter (\move -> isValidMove board move color) (map (\pos -> (position, pos)) mkCoords)
+  _ -> []
+
+genPossibleMoves :: Board -> Color -> [Move]
+genPossibleMoves board color = concatMap (genPossibleMovesPiece board) (getPositions board color)
+
+isPositionUnderAttack :: Color -> Board -> Position -> Bool
+isPositionUnderAttack color board pos = elem pos $ map snd $ genPossibleMoves board $ swapColor color

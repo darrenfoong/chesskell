@@ -1,6 +1,6 @@
 module PositionSpec where
 
-import Position (isValidPosition, mkPosition, mkPositions, mkPositionsInner)
+import Position (isValidPosition, mkPosition, mkPositions)
 import Test.Hspec
 
 {- HLINT ignore "Redundant do" -}
@@ -35,13 +35,3 @@ spec = do
 
     it "makes correct positions between (3, 8) and (1, 6)" $ do
       mkPositions (3, 8) (1, 6) `shouldBe` [(2, 7)]
-
-  describe "mkPositionsInner" $ do
-    it "makes correct positions between (1, 1) and (1, 1)" $ do
-      mkPositionsInner (1, 1) (1, 1) 1 1 `shouldBe` []
-
-    it "makes correct positions between (1, 1) and (2, 2)" $ do
-      mkPositionsInner (1, 1) (2, 2) 1 1 `shouldBe` [(1, 1)]
-
-    it "makes correct positions between (1, 1) and (4, 4)" $ do
-      mkPositionsInner (1, 1) (4, 4) 1 1 `shouldBe` [(1, 1), (2, 2), (3, 3)]

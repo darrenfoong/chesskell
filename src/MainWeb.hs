@@ -6,11 +6,11 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
-import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, readBoard, writeBoard)
+import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, promotePawns, readBoard, writeBoard)
 import Data.Char
 import Data.Maybe
 import Data.Text (Text, append, unpack)
-import Logic (genMove, isInCheck, isInCheckmate, promotePawns)
+import Logic (genMove, isInCheck, isInCheckmate)
 import Move (readMove, writeMove)
 import Scoring (scoreBoard)
 import System.Random
