@@ -88,37 +88,37 @@ compareScoreMove :: (Int -> Int -> Bool) -> (Int, Maybe Move) -> (Int, Maybe Mov
 compareScoreMove f (s1, m1) (s2, m2) = if f s1 s2 then (s1, m1) else (s2, m2)
 
 minimax :: ([Move] -> [Move]) -> Board -> Color -> Color -> Int -> Int -> Int -> Bool -> Maybe (Int, Move)
-minimax f board scoringColor playerColor n alpha beta maximising =
+minimax movesTransformer board scoringColor playerColor n alpha beta maximising =
   let extractMove previousBestScore mPreviousBestMove = do
         previousBestMove <- mPreviousBestMove
         Just (previousBestScore, previousBestMove)
-      h a b maximising' s m previousBestScore mPreviousBestMove ms =
+      updateAlphaBeta a b maximising' s m previousBestScore mPreviousBestMove ms =
         if maximising'
           then
             let (currentBestScore, mCurrentBestMove) = compareScoreMove (>=) (s, Just m) (previousBestScore, mPreviousBestMove)
                 updatedA = max a currentBestScore
              in if updatedA >= b
                   then extractMove currentBestScore mCurrentBestMove
-                  else g updatedA b currentBestScore mCurrentBestMove ms
+                  else minimaxInner updatedA b currentBestScore mCurrentBestMove ms
           else
             let (currentBestScore, mCurrentBestMove) = compareScoreMove (<=) (s, Just m) (previousBestScore, mPreviousBestMove)
                 updatedB = min b currentBestScore
              in if updatedB <= a
                   then extractMove currentBestScore mCurrentBestMove
-                  else g a updatedB currentBestScore mCurrentBestMove ms
-      g _ _ previousBestScore mPreviousBestMove [] = extractMove previousBestScore mPreviousBestMove
-      g _ _ _ Nothing [m] = Just (scoreBoard scoringColor $ movePiece board m, m)
-      g a b previousBestScore mPreviousBestMove (m : ms) =
+                  else minimaxInner a updatedB currentBestScore mCurrentBestMove ms
+      minimaxInner _ _ previousBestScore mPreviousBestMove [] = extractMove previousBestScore mPreviousBestMove
+      minimaxInner _ _ _ Nothing [m] = Just (scoreBoard scoringColor $ movePiece board m, m)
+      minimaxInner a b previousBestScore mPreviousBestMove (m : ms) =
         if n == 1
           then
             let s = scoreBoard scoringColor $ movePiece board m
-             in h a b maximising s m previousBestScore mPreviousBestMove ms
+             in updateAlphaBeta a b maximising s m previousBestScore mPreviousBestMove ms
           else do
-            case minimax f (movePiece board m) scoringColor (swapColor playerColor) (n -1) a b (not maximising) of
-              Nothing -> g a b previousBestScore mPreviousBestMove ms
-              Just (s, _) -> h a b maximising s m previousBestScore mPreviousBestMove ms
+            case minimax movesTransformer (movePiece board m) scoringColor (swapColor playerColor) (n -1) a b (not maximising) of
+              Nothing -> minimaxInner a b previousBestScore mPreviousBestMove ms
+              Just (s, _) -> updateAlphaBeta a b maximising s m previousBestScore mPreviousBestMove ms
       initialBestScore = if maximising then negInfinity else posInfinity
-   in g alpha beta initialBestScore Nothing $ f $ genNonCheckMoves board playerColor
+   in minimaxInner alpha beta initialBestScore Nothing $ movesTransformer $ genNonCheckMoves board playerColor
 
 genNextMoveBoards :: Board -> Color -> [(Move, Board)]
 genNextMoveBoards board color =
