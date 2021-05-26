@@ -2,6 +2,7 @@ import Board (advanceBoard, mkBoard, printBoard)
 import Control.Monad
 import Logic (respondBoard)
 import Move (readMove)
+import Scoring (scoreBoard)
 import System.Random
 import Types (Board, Color (..), swapColor)
 
@@ -23,7 +24,7 @@ loopBoardInner :: StdGen -> Board -> Color -> String -> Either String (StdGen, B
 loopBoardInner gen board color moveStr = do
   move <- readMove moveStr
   advancedBoard <- advanceBoard board move color
-  let (newGen, mBoard) = respondBoard gen advancedBoard $ swapColor color
+  let (newGen, mBoard) = respondBoard scoreBoard gen advancedBoard $ swapColor color
    in do
         respondedBoard <- mBoard
         return (newGen, respondedBoard)

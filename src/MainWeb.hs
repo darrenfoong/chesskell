@@ -10,8 +10,9 @@ import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, readBoard, writ
 import Data.Char
 import Data.Maybe
 import Data.Text (Text, append, unpack)
-import Logic (genMove, isInCheck, isInCheckmate, promotePawns, scoreBoard)
+import Logic (genMove, isInCheck, isInCheckmate, promotePawns)
 import Move (readMove, writeMove)
+import Scoring (scoreBoard)
 import System.Random
 import Types (Color (..), swapColor)
 import Yesod
@@ -98,7 +99,7 @@ getHomeR = do
         Start -> Right Nothing
         PendingMoveStart -> do
           previousBoardWithWhite <- ePreviousBoardWithWhite
-          let (_, mMove) = genMove gen previousBoardWithWhite $ swapColor color
+          let (_, mMove) = genMove scoreBoard gen previousBoardWithWhite $ swapColor color
            in Right mMove
         PendingMoveEnd -> Right Nothing
   let ePreviousBoardWithBlack =

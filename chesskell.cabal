@@ -14,6 +14,8 @@ executable chesskell
                        Position,
                        Move,
                        Logic,
+                       Minimax,
+                       Scoring,
                        Utils
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base,
@@ -30,6 +32,8 @@ executable chesskell-web
                        Position,
                        Move,
                        Logic,
+                       Minimax,
+                       Scoring,
                        Utils
   ghc-options:         -Wall -Wincomplete-uni-patterns
   build-depends:       base,
@@ -47,6 +51,8 @@ library
                        Position,
                        Move,
                        Logic,
+                       Minimax,
+                       Scoring,
                        Utils
   build-depends:       base,
                        random,
