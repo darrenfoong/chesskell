@@ -50,7 +50,7 @@ scoreBoardTablePosition board color position =
     CP pcolor p ->
       if color == pcolor
         then
-          let table = getPieceSquareTable color p
+          let table = getTable color p
            in getTableValue table position
         else 0
     Null -> 0
@@ -58,14 +58,14 @@ scoreBoardTablePosition board color position =
 getTableValue :: [[Int]] -> Position -> Int
 getTableValue table (cn, rn) = table !! (rn -1) !! (cn -1)
 
-getPieceSquareTable :: Color -> Piece -> [[Int]]
-getPieceSquareTable White = reverse . getBlackPieceSquareTable
-getPieceSquareTable Black = getBlackPieceSquareTable
+getTable :: Color -> Piece -> [[Int]]
+getTable White = reverse . getBlackTable
+getTable Black = getBlackTable
 
 -- obtained from https://www.chessprogramming.org/Simplified_Evaluation_Function
 
-getBlackPieceSquareTable :: Piece -> [[Int]]
-getBlackPieceSquareTable King =
+getBlackTable :: Piece -> [[Int]]
+getBlackTable King =
   [ [-30, -40, -40, -50, -50, -40, -40, -30],
     [-30, -40, -40, -50, -50, -40, -40, -30],
     [-30, -40, -40, -50, -50, -40, -40, -30],
@@ -75,7 +75,7 @@ getBlackPieceSquareTable King =
     [20, 20, 0, 0, 0, 0, 20, 20],
     [20, 30, 10, 0, 0, 10, 30, 20]
   ]
-getBlackPieceSquareTable Queen =
+getBlackTable Queen =
   [ [-20, -10, -10, -5, -5, -10, -10, -20],
     [-10, 0, 0, 0, 0, 0, 0, -10],
     [-10, 0, 5, 5, 5, 5, 0, -10],
@@ -85,7 +85,7 @@ getBlackPieceSquareTable Queen =
     [-10, 0, 5, 0, 0, 0, 0, -10],
     [-20, -10, -10, -5, -5, -10, -10, -20]
   ]
-getBlackPieceSquareTable Rook =
+getBlackTable Rook =
   [ [0, 0, 0, 0, 0, 0, 0, 0],
     [5, 10, 10, 10, 10, 10, 10, 5],
     [-5, 0, 0, 0, 0, 0, 0, -5],
@@ -95,7 +95,7 @@ getBlackPieceSquareTable Rook =
     [-5, 0, 0, 0, 0, 0, 0, -5],
     [0, 0, 0, 5, 5, 0, 0, 0]
   ]
-getBlackPieceSquareTable Bishop =
+getBlackTable Bishop =
   [ [-20, -10, -10, -10, -10, -10, -10, -20],
     [-10, 0, 0, 0, 0, 0, 0, -10],
     [-10, 0, 5, 10, 10, 5, 0, -10],
@@ -105,7 +105,7 @@ getBlackPieceSquareTable Bishop =
     [-10, 5, 0, 0, 0, 0, 5, -10],
     [-20, -10, -10, -10, -10, -10, -10, -20]
   ]
-getBlackPieceSquareTable Knight =
+getBlackTable Knight =
   [ [-50, -40, -30, -30, -30, -30, -40, -50],
     [-40, -20, 0, 0, 0, 0, -20, -40],
     [-30, 0, 10, 15, 15, 10, 0, -30],
@@ -115,7 +115,7 @@ getBlackPieceSquareTable Knight =
     [-40, -20, 0, 5, 5, 0, -20, -40],
     [-50, -40, -30, -30, -30, -30, -40, -50]
   ]
-getBlackPieceSquareTable Pawn =
+getBlackTable Pawn =
   [ [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 50, 50, 50, 50, 50, 50, 50],
     [0, 10, 20, 30, 30, 20, 10, 10],
