@@ -36,10 +36,10 @@ scoreBoardTableInner :: Board -> Color -> Int
 scoreBoardTableInner board color =
   (sum $ map (scoreBoardPositionTable board color) mkCoords)
     + if isInCheck board color
-      then -100
+      then -1000
       else
         0
-          + if isInCheckmate board color then -1000 else 0
+          + if isInCheckmate board color then -10000 else 0
 
 scoreBoardPositionTable :: Board -> Color -> Position -> Int
 scoreBoardPositionTable board color position =
