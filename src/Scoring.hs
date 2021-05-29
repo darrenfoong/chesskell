@@ -1,3 +1,5 @@
+{-# OPTIONS -Wno-unused-top-binds #-}
+
 module Scoring
   ( scoreBoard,
     scoreBoardTableInner,
