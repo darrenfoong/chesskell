@@ -12,7 +12,7 @@ import Data.Maybe
 import Data.Text (Text, append, unpack)
 import Logic (genMove, isInCheck, isInCheckmate)
 import Move (readMove, writeMove)
-import Scoring (scoreBoard, scoreBoardTableInner)
+import Scoring (scoreBoard)
 import System.Random
 import Types (Color (..), swapColor)
 import Yesod
@@ -186,8 +186,8 @@ getHomeR = do
       <p>State: #{show state}
       <p>You are White.
       $maybe nextBoard <- mNextBoard
-        <p>White: score: #{scoreBoardTableInner nextBoard White}; check: #{show (isInCheck nextBoard White)}; checkmate: #{show (isInCheckmate nextBoard White)}
-        <p>Black: score: #{scoreBoardTableInner nextBoard Black}; check: #{show (isInCheck nextBoard Black)}; checkmate: #{show (isInCheckmate nextBoard Black)}
+        <p>White: score: #{scoreBoard nextBoard White}; check: #{show (isInCheck nextBoard White)}; checkmate: #{show (isInCheckmate nextBoard White)}
+        <p>Black: score: #{scoreBoard nextBoard Black}; check: #{show (isInCheck nextBoard Black)}; checkmate: #{show (isInCheckmate nextBoard Black)}
       $if state /= Start
         $maybe blackMove <- mBlackMove
           <p>Black played: #{writeMove blackMove}
