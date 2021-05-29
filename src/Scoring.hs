@@ -37,15 +37,15 @@ scorePiece Null = 0
 
 scoreBoardTableInner :: Board -> Color -> Int
 scoreBoardTableInner board color =
-  sum (map (scoreBoardPositionTable board color) mkCoords)
+  sum (map (scoreBoardTablePosition board color) mkCoords)
     + if isInCheck board color
       then -1000
       else
         0
           + if isInCheckmate board color then -10000 else 0
 
-scoreBoardPositionTable :: Board -> Color -> Position -> Int
-scoreBoardPositionTable board color position =
+scoreBoardTablePosition :: Board -> Color -> Position -> Int
+scoreBoardTablePosition board color position =
   case getPiece board position of
     CP pcolor p ->
       if color == pcolor
@@ -59,13 +59,13 @@ getTableValue :: [[Int]] -> Position -> Int
 getTableValue table (cn, rn) = table !! (rn -1) !! (cn -1)
 
 getPieceSquareTable :: Color -> Piece -> [[Int]]
-getPieceSquareTable White = reverse . getWhitePieceSquareTable
-getPieceSquareTable Black = getWhitePieceSquareTable
+getPieceSquareTable White = reverse . getBlackPieceSquareTable
+getPieceSquareTable Black = getBlackPieceSquareTable
 
 -- obtained from https://www.chessprogramming.org/Simplified_Evaluation_Function
 
-getWhitePieceSquareTable :: Piece -> [[Int]]
-getWhitePieceSquareTable King =
+getBlackPieceSquareTable :: Piece -> [[Int]]
+getBlackPieceSquareTable King =
   [ [-30, -40, -40, -50, -50, -40, -40, -30],
     [-30, -40, -40, -50, -50, -40, -40, -30],
     [-30, -40, -40, -50, -50, -40, -40, -30],
@@ -75,7 +75,7 @@ getWhitePieceSquareTable King =
     [20, 20, 0, 0, 0, 0, 20, 20],
     [20, 30, 10, 0, 0, 10, 30, 20]
   ]
-getWhitePieceSquareTable Queen =
+getBlackPieceSquareTable Queen =
   [ [-20, -10, -10, -5, -5, -10, -10, -20],
     [-10, 0, 0, 0, 0, 0, 0, -10],
     [-10, 0, 5, 5, 5, 5, 0, -10],
@@ -85,7 +85,7 @@ getWhitePieceSquareTable Queen =
     [-10, 0, 5, 0, 0, 0, 0, -10],
     [-20, -10, -10, -5, -5, -10, -10, -20]
   ]
-getWhitePieceSquareTable Rook =
+getBlackPieceSquareTable Rook =
   [ [0, 0, 0, 0, 0, 0, 0, 0],
     [5, 10, 10, 10, 10, 10, 10, 5],
     [-5, 0, 0, 0, 0, 0, 0, -5],
@@ -95,7 +95,7 @@ getWhitePieceSquareTable Rook =
     [-5, 0, 0, 0, 0, 0, 0, -5],
     [0, 0, 0, 5, 5, 0, 0, 0]
   ]
-getWhitePieceSquareTable Bishop =
+getBlackPieceSquareTable Bishop =
   [ [-20, -10, -10, -10, -10, -10, -10, -20],
     [-10, 0, 0, 0, 0, 0, 0, -10],
     [-10, 0, 5, 10, 10, 5, 0, -10],
@@ -105,7 +105,7 @@ getWhitePieceSquareTable Bishop =
     [-10, 5, 0, 0, 0, 0, 5, -10],
     [-20, -10, -10, -10, -10, -10, -10, -20]
   ]
-getWhitePieceSquareTable Knight =
+getBlackPieceSquareTable Knight =
   [ [-50, -40, -30, -30, -30, -30, -40, -50],
     [-40, -20, 0, 0, 0, 0, -20, -40],
     [-30, 0, 10, 15, 15, 10, 0, -30],
@@ -115,7 +115,7 @@ getWhitePieceSquareTable Knight =
     [-40, -20, 0, 5, 5, 0, -20, -40],
     [-50, -40, -30, -30, -30, -30, -40, -50]
   ]
-getWhitePieceSquareTable Pawn =
+getBlackPieceSquareTable Pawn =
   [ [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 50, 50, 50, 50, 50, 50, 50],
     [0, 10, 20, 30, 30, 20, 10, 10],
