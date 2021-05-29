@@ -3,11 +3,12 @@ module Scoring
   )
 where
 
+import Board (getPiece, mkCoords)
 import Logic (isInCheck, isInCheckmate)
-import Types (Board, CPiece (..), Color (..), Piece (..), swapColor)
+import Types (Board, CPiece (..), Color (..), Piece (..), Position, swapColor)
 
 scoreBoard :: Board -> Color -> Int
-scoreBoard board color = scoreBoardInner board color - scoreBoardInner board (swapColor color)
+scoreBoard board color = scoreBoardTableInner board color - scoreBoardTableInner board (swapColor color)
 
 scoreBoardInner :: Board -> Color -> Int
 scoreBoardInner board color =
@@ -30,6 +31,23 @@ scorePiece (CP _ Bishop) = 3
 scorePiece (CP _ Knight) = 3
 scorePiece (CP _ Pawn) = 1
 scorePiece Null = 0
+
+scoreBoardTableInner :: Board -> Color -> Int
+scoreBoardTableInner board color =
+  (sum $ map (scoreBoardPositionTable board color) mkCoords)
+    + if isInCheck board color
+      then -100
+      else
+        0
+          + if isInCheckmate board color then -1000 else 0
+
+scoreBoardPositionTable :: Board -> Color -> Position -> Int
+scoreBoardPositionTable board color position =
+  let table = getPieceSquareTable $ getPiece board position
+   in getTableValue table position
+
+getTableValue :: [[Int]] -> Position -> Int
+getTableValue table (cn, rn) = table !! (rn -1) !! (cn -1)
 
 getPieceSquareTable :: CPiece -> [[Int]]
 getPieceSquareTable (CP White p) = getWhitePieceSquareTable p

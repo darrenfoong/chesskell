@@ -1,5 +1,6 @@
 module Board
   ( mkBoard,
+    mkCoords,
     printBoard,
     prettyPrintPiece,
     readBoard,
