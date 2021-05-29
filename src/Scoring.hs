@@ -35,7 +35,7 @@ scorePiece Null = 0
 
 scoreBoardTableInner :: Board -> Color -> Int
 scoreBoardTableInner board color =
-  (sum $ map (scoreBoardPositionTable board color) mkCoords)
+  sum (map (scoreBoardPositionTable board color) mkCoords)
     + if isInCheck board color
       then -1000
       else
@@ -57,8 +57,10 @@ getTableValue :: [[Int]] -> Position -> Int
 getTableValue table (cn, rn) = table !! (rn -1) !! (cn -1)
 
 getPieceSquareTable :: Color -> Piece -> [[Int]]
-getPieceSquareTable White = getWhitePieceSquareTable
-getPieceSquareTable Black = reverse . getWhitePieceSquareTable
+getPieceSquareTable White = reverse . getWhitePieceSquareTable
+getPieceSquareTable Black = getWhitePieceSquareTable
+
+-- obtained from https://www.chessprogramming.org/Simplified_Evaluation_Function
 
 getWhitePieceSquareTable :: Piece -> [[Int]]
 getWhitePieceSquareTable King =
