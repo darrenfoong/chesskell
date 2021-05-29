@@ -21,7 +21,7 @@ isInCheck board color = maybe False (isPositionUnderAttack board color) (getKing
 genMove :: (Board -> Color -> Int) -> StdGen -> Board -> Color -> (StdGen, Maybe Move)
 genMove boardScorer gen board color =
   let (gen1, gen2) = split gen
-   in case minimax boardScorer genPossibleNonCheckMoves (shuffle gen1) board color color 3 negInfinity posInfinity True of
+   in case minimax boardScorer genPossibleNonCheckMoves (shuffle gen1) board color color 4 negInfinity posInfinity True of
         Nothing -> (gen2, Nothing)
         Just (_, m) -> (gen2, Just m)
 

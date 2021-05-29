@@ -1,5 +1,6 @@
 module Scoring
   ( scoreBoard,
+    scoreBoardTableInner,
   )
 where
 
@@ -43,16 +44,21 @@ scoreBoardTableInner board color =
 
 scoreBoardPositionTable :: Board -> Color -> Position -> Int
 scoreBoardPositionTable board color position =
-  let table = getPieceSquareTable $ getPiece board position
-   in getTableValue table position
+  case getPiece board position of
+    CP pcolor p ->
+      if color == pcolor
+        then
+          let table = getPieceSquareTable color p
+           in getTableValue table position
+        else 0
+    Null -> 0
 
 getTableValue :: [[Int]] -> Position -> Int
 getTableValue table (cn, rn) = table !! (rn -1) !! (cn -1)
 
-getPieceSquareTable :: CPiece -> [[Int]]
-getPieceSquareTable (CP White p) = getWhitePieceSquareTable p
-getPieceSquareTable (CP Black p) = reverse $ getWhitePieceSquareTable p
-getPieceSquareTable Null = replicate 8 $ replicate 8 0
+getPieceSquareTable :: Color -> Piece -> [[Int]]
+getPieceSquareTable White = getWhitePieceSquareTable
+getPieceSquareTable Black = reverse . getWhitePieceSquareTable
 
 getWhitePieceSquareTable :: Piece -> [[Int]]
 getWhitePieceSquareTable King =
