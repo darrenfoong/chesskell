@@ -25,6 +25,7 @@ genMove boardScorer gen board color =
         Nothing -> (gen2, Nothing)
         Just (_, m) -> (gen2, Just m)
 
+-- TODO Add generation of castling moves here
 genPossibleNonCheckMoves :: Board -> Color -> [Move]
 genPossibleNonCheckMoves board color = map fst $ filter (\(_, b) -> not $ isInCheck b color) $ genNextMoveBoards board color
 
