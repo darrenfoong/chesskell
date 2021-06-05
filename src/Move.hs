@@ -17,6 +17,7 @@ readMove moveStr@(sc : sr : ec : er : _) =
         then Right $ Normal (start, end)
         else Left $ "ERROR: Invalid move string: " ++ moveStr
 readMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
+-- TODO Handle reading of castling moves
 
 writeMove :: CMove -> String
 writeMove (Normal ((sc, sr), (ec, er))) =
