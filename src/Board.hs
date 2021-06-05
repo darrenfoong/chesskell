@@ -192,29 +192,17 @@ movePiece :: Board -> CMove -> Board
 movePiece board (Normal (start, end)) =
   let (intermediateBoard, oldPiece) = removePiece board start
    in setPiece intermediateBoard end oldPiece
-movePiece board (Castling Black Short) =
-  let (b1, _) = removePiece board (5, 8)
-      (b2, _) = removePiece b1 (8, 8)
-      b3 = setPiece b2 (6, 8) (CP Black (Rook True))
-      b4 = setPiece b3 (7, 8) (CP Black (King True))
-   in b4
-movePiece board (Castling Black Long) =
-  let (b1, _) = removePiece board (5, 8)
-      (b2, _) = removePiece b1 (1, 8)
-      b3 = setPiece b2 (4, 8) (CP Black (Rook True))
-      b4 = setPiece b3 (3, 8) (CP Black (King True))
-   in b4
-movePiece board (Castling White Short) =
-  let (b1, _) = removePiece board (5, 1)
-      (b2, _) = removePiece b1 (8, 1)
-      b3 = setPiece b2 (6, 8) (CP White (Rook True))
-      b4 = setPiece b3 (7, 8) (CP White (King True))
-   in b4
-movePiece board (Castling White Long) =
-  let (b1, _) = removePiece board (5, 1)
-      (b2, _) = removePiece b1 (1, 1)
-      b3 = setPiece b2 (4, 1) (CP White (Rook True))
-      b4 = setPiece b3 (3, 1) (CP White (King True))
+movePiece board (Castling color side) =
+  let row = case color of
+        Black -> 8
+        White -> 1
+      (rookColumn, newRookColumn, newKingColumn) = case side of
+        Short -> (8, 6, 7)
+        Long -> (1, 4, 3)
+      (b1, _) = removePiece board (5, row)
+      (b2, _) = removePiece b1 (rookColumn, row)
+      b3 = setPiece b2 (newRookColumn, row) (CP Black (Rook True))
+      b4 = setPiece b3 (newKingColumn, row) (CP Black (King True))
    in b4
 
 advanceBoard :: Board -> Color -> CMove -> Either String Board
