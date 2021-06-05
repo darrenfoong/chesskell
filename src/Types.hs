@@ -5,6 +5,8 @@ module Types
     Board,
     Position,
     Move,
+    CastlingSide,
+    CMove (..),
     swapColor,
   )
 where
@@ -20,6 +22,10 @@ type Board = [[CPiece]]
 type Position = (Int, Int)
 
 type Move = (Position, Position)
+
+data CastlingSide = Short | Long
+
+data CMove = Normal Move | Castling Color CastlingSide
 
 swapColor :: Color -> Color
 swapColor Black = White

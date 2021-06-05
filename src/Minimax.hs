@@ -6,7 +6,7 @@ module Minimax
 where
 
 import Board (movePiece)
-import Types (Board, Color (..), Move, swapColor)
+import Types (Board, CMove (..), Color (..), swapColor)
 
 posInfinity :: Int
 posInfinity = 100000
@@ -14,10 +14,10 @@ posInfinity = 100000
 negInfinity :: Int
 negInfinity = - posInfinity
 
-compareScoreMove :: (Int -> Int -> Bool) -> (Int, Maybe Move) -> (Int, Maybe Move) -> (Int, Maybe Move)
+compareScoreMove :: (Int -> Int -> Bool) -> (Int, Maybe CMove) -> (Int, Maybe CMove) -> (Int, Maybe CMove)
 compareScoreMove f (s1, m1) (s2, m2) = if f s1 s2 then (s1, m1) else (s2, m2)
 
-minimax :: (Board -> Color -> Int) -> (Board -> Color -> [Move]) -> ([Move] -> [Move]) -> Board -> Color -> Color -> Int -> Int -> Int -> Bool -> Maybe (Int, Move)
+minimax :: (Board -> Color -> Int) -> (Board -> Color -> [CMove]) -> ([CMove] -> [CMove]) -> Board -> Color -> Color -> Int -> Int -> Int -> Bool -> Maybe (Int, CMove)
 minimax boardScorer nextStateGen movesTransformer board scoringColor playerColor n alpha beta maximising =
   let extractMove previousBestScore mPreviousBestMove = do
         previousBestMove <- mPreviousBestMove

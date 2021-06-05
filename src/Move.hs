@@ -7,21 +7,22 @@ where
 
 import Data.Char (chr, intToDigit, ord)
 import Position (isValidPosition, mkPosition)
-import Types (CPiece (..), Color (..), Move, Piece (..))
+import Types (CMove (..), CPiece (..), Color (..), Move, Piece (..))
 
-readMove :: String -> Either String Move
+readMove :: String -> Either String CMove
 readMove moveStr@(sc : sr : ec : er : _) =
   let start = mkPosition (sc, sr)
       end = mkPosition (ec, er)
    in if isValidPosition start && isValidPosition end
-        then Right (start, end)
+        then Right $ Normal (start, end)
         else Left $ "ERROR: Invalid move string: " ++ moveStr
 readMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
 
-writeMove :: Move -> String
-writeMove ((sc, sr), (ec, er)) =
+writeMove :: CMove -> String
+writeMove (Normal ((sc, sr), (ec, er))) =
   let f n = chr $ ord 'a' + n - 1
    in [f sc, intToDigit sr, f ec, intToDigit er]
+writeMove (Castling _ _) = "" -- TODO
 
 isValidMovePiece :: CPiece -> Bool -> Move -> Bool
 isValidMovePiece (CP Black Pawn) False ((sc, sr), (ec, er)) =

@@ -19,7 +19,7 @@ where
 import Data.Text (Text, chunksOf, unpack)
 import Move (isValidMovePiece)
 import Position (mkPositions)
-import Types (Board, CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
+import Types (Board, CMove (..), CPiece (..), Color (..), Move, Piece (..), Position, swapColor)
 
 mkBoard :: Board
 mkBoard =
@@ -188,16 +188,20 @@ setPiece board (cn, rn) piece =
 removePiece :: Board -> Position -> (Board, CPiece)
 removePiece board (cn, rn) = alterBoardRow board rn (\r -> alterRow r cn (const Null))
 
-movePiece :: Board -> Move -> Board
-movePiece board (start, end) =
+movePiece :: Board -> CMove -> Board
+movePiece board (Normal (start, end)) =
   let (intermediateBoard, oldPiece) = removePiece board start
    in setPiece intermediateBoard end oldPiece
+movePiece board (Castling _ _) = board -- TODO
 
-advanceBoard :: Board -> Color -> Move -> Either String Board
-advanceBoard board color move =
-  if isValidMove board color move
-    then Right $ movePiece board move
-    else Left $ "ERROR: Invalid move: " ++ show move
+advanceBoard :: Board -> Color -> CMove -> Either String Board
+advanceBoard board color cmove =
+  case cmove of
+    Normal move ->
+      if isValidMove board color move
+        then Right $ movePiece board $ Normal move
+        else Left $ "ERROR: Invalid move: " ++ show move
+    Castling _ _ -> Right board -- TODO
 
 getPositions :: Board -> Color -> [Position]
 getPositions board color =
