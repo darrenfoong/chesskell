@@ -201,8 +201,8 @@ movePiece board (Castling color side) =
         Long -> (1, 4, 3)
       (b1, _) = removePiece board (5, row)
       (b2, _) = removePiece b1 (rookColumn, row)
-      b3 = setPiece b2 (newRookColumn, row) (CP Black (Rook True))
-      b4 = setPiece b3 (newKingColumn, row) (CP Black (King True))
+      b3 = setPiece b2 (newRookColumn, row) (CP color (Rook True))
+      b4 = setPiece b3 (newKingColumn, row) (CP color (King True))
    in b4
 
 advanceBoard :: Board -> Color -> Move -> Either String Board
