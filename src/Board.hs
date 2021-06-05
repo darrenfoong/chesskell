@@ -222,9 +222,20 @@ advanceBoard board color cmove =
   case cmove of
     Normal move ->
       if isValidMove board color move
-        then Right $ movePiece board $ Normal move
+        then Right $ movePiece board cmove
         else Left $ "ERROR: Invalid move: " ++ show move
-    Castling _ _ -> Right board -- TODO
+    Castling ccolor side ->
+      let row = case color of
+            Black -> 8
+            White -> 1
+          rookColumn = case side of
+            Short -> 8
+            Long -> 1
+          king = getPiece board (5, row)
+          rook = getPiece board (rookColumn, row)
+       in if color == ccolor && king == CP color (King False) && rook == CP color (Rook False)
+            then Right $ movePiece board cmove
+            else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
 
 getPositions :: Board -> Color -> [Position]
 getPositions board color =
