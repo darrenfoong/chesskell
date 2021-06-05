@@ -31,6 +31,6 @@ genPossibleNonCheckMoves board color = map fst $ filter (\(_, b) -> not $ isInCh
 
 genNextMoveBoards :: Board -> Color -> [(CMove, Board)]
 genNextMoveBoards board color =
-  let possibleMoves = map Normal $ genPossibleMoves board color -- TODO
-      possibleMoveBoards = map (\m -> (m, fromRight [] $ advanceBoard board color m)) possibleMoves
+  let possibleMoves = genPossibleMoves board color
+      possibleMoveBoards = map (\m -> (Normal m, fromRight [] $ advanceBoard board color m)) possibleMoves -- TODO Normal
    in filter (\(_, b) -> b /= []) possibleMoveBoards

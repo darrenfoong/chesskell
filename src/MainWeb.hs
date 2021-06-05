@@ -11,10 +11,10 @@ import Data.Char
 import Data.Maybe
 import Data.Text (Text, append, unpack)
 import Logic (genMove, isInCheck, isInCheckmate)
-import Move (readMove, writeMove)
+import Move (cMoveToMove, readMove, writeCMove)
 import Scoring (scoreBoard)
 import System.Random
-import Types (Color (..), swapColor)
+import Types (CMove (..), Color (..), swapColor)
 import Yesod
 
 data App = App
@@ -95,31 +95,31 @@ getHomeR = do
 
   gen <- liftIO newStdGen
 
-  let emBlackMove = case state of
+  let emBlackCMove = case state of
         Start -> Right Nothing
         PendingMoveStart -> do
           previousBoardWithWhite <- ePreviousBoardWithWhite
-          let (_, mMove) = genMove scoreBoard gen previousBoardWithWhite $ swapColor color
-           in Right mMove
+          let (_, mCMove) = genMove scoreBoard gen previousBoardWithWhite $ swapColor color
+           in Right mCMove
         PendingMoveEnd -> Right Nothing
   let ePreviousBoardWithBlack =
         promotePawns <$> do
-          mBlackMove <- emBlackMove
-          case mBlackMove of
+          mBlackCMove <- emBlackCMove
+          case mBlackCMove of
             Nothing -> ePreviousBoardWithWhite
-            Just blackMove -> do
+            Just blackCMove -> do
               previousBoardWithWhite <- ePreviousBoardWithWhite
-              advanceBoard previousBoardWithWhite (swapColor color) blackMove
+              advanceBoard previousBoardWithWhite (swapColor color) $ cMoveToMove blackCMove
 
-  let mBlackMove = case emBlackMove of
+  let mBlackMove = case emBlackCMove of
         Left _ -> Nothing
-        Right mMove -> case mMove of
+        Right mCMove -> case mCMove of
           Nothing -> case mPreviousBlackMove of
             Nothing -> Nothing
             Just previousBlackMove -> case readMove $ unpack previousBlackMove of
               Left _ -> Nothing
               Right blackMove -> Just blackMove
-          Just move -> Just move
+          Just move -> Just $ cMoveToMove move
   let mErr = either Just (const Nothing) ePreviousBoardWithBlack
   let mNextBoard = case ePreviousBoardWithBlack of
         Left _ -> either (const Nothing) Just ePreviousBoard
@@ -190,7 +190,7 @@ getHomeR = do
         <p>Black: score: #{scoreBoard nextBoard Black}; check: #{show (isInCheck nextBoard Black)}; checkmate: #{show (isInCheckmate nextBoard Black)}
       $if state /= Start
         $maybe blackMove <- mBlackMove
-          <p>Black played: #{writeMove blackMove}
+          <p>Black played: #{writeCMove $ Normal blackMove}
       $if state /= PendingMoveEnd
         <p>Please select a piece.
       $else
@@ -208,7 +208,7 @@ getHomeR = do
           $maybe position <- mPosition
             <input type="hidden" name="start" value="#{position}">
         $maybe blackMove <- mBlackMove
-          <input type="hidden" name="previousBlackMove" value="#{writeMove blackMove}">
+          <input type="hidden" name="previousBlackMove" value="#{writeCMove $ Normal blackMove}">
         $maybe nextBoard <- mNextBoard
           <div id="board">
             $forall r <- rs

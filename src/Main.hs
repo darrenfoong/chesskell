@@ -1,7 +1,7 @@
 import Board (advanceBoard, mkBoard, printBoard)
 import Control.Monad
 import Logic (genMove)
-import Move (readMove)
+import Move (cMoveToMove, readMove)
 import Scoring (scoreBoard)
 import System.Random
 import Types (Board, Color (..), swapColor)
@@ -33,5 +33,5 @@ respondBoard :: (Board -> Color -> Int) -> StdGen -> Board -> Color -> (StdGen, 
 respondBoard boardScorer gen board color =
   let (newGen, mMove) = genMove boardScorer gen board color
    in case mMove of
-        Just m -> (newGen, advanceBoard board color m)
+        Just m -> (newGen, advanceBoard board color $ cMoveToMove m)
         Nothing -> (newGen, Left "ERROR: Program has made an invalid move")

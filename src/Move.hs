@@ -1,30 +1,36 @@
 module Move
   ( readMove,
-    writeMove,
+    writeCMove,
+    cMoveToMove,
     isValidMovePiece,
   )
 where
 
 import Data.Char (chr, intToDigit, ord)
 import Position (isValidPosition, mkPosition)
-import Types (CMove (..), CPiece (..), Color (..), Move, Piece (..))
+import Types (CMove (..), CPiece (..), CastlingSide (..), Color (..), Move, Piece (..))
 
-readMove :: String -> Either String CMove
+readMove :: String -> Either String Move
 readMove moveStr@(sc : sr : ec : er : _) =
   let start = mkPosition (sc, sr)
       end = mkPosition (ec, er)
    in if isValidPosition start && isValidPosition end
-        then Right $ Normal (start, end)
+        then Right (start, end)
         else Left $ "ERROR: Invalid move string: " ++ moveStr
 readMove moveStr = Left $ "ERROR: Invalid move string: " ++ moveStr
 
--- TODO Handle reading of castling moves
-
-writeMove :: CMove -> String
-writeMove (Normal ((sc, sr), (ec, er))) =
+writeCMove :: CMove -> String
+writeCMove (Normal ((sc, sr), (ec, er))) =
   let f n = chr $ ord 'a' + n - 1
    in [f sc, intToDigit sr, f ec, intToDigit er]
-writeMove (Castling color side) = "Castling: " ++ show color ++ " " ++ show side
+writeCMove (Castling color side) = "Castling: " ++ show color ++ " " ++ show side
+
+cMoveToMove :: CMove -> Move
+cMoveToMove (Normal move) = move
+cMoveToMove (Castling Black Short) = ((5, 8), (7, 8))
+cMoveToMove (Castling Black Long) = ((5, 8), (3, 8))
+cMoveToMove (Castling White Short) = ((5, 1), (7, 1))
+cMoveToMove (Castling White Long) = ((5, 1), (3, 1))
 
 isValidMovePiece :: CPiece -> Bool -> Move -> Bool
 isValidMovePiece (CP Black Pawn) False ((sc, sr), (ec, er)) =

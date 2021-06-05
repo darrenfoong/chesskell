@@ -205,25 +205,33 @@ movePiece board (Castling color side) =
       b4 = setPiece b3 (newKingColumn, row) (CP Black (King True))
    in b4
 
-advanceBoard :: Board -> Color -> CMove -> Either String Board
-advanceBoard board color cmove =
-  case cmove of
-    Normal move ->
-      if isValidMove board color move
-        then Right $ movePiece board cmove
-        else Left $ "ERROR: Invalid move: " ++ show move
-    Castling ccolor side ->
-      let row = case color of
-            Black -> 8
-            White -> 1
-          rookColumn = case side of
-            Short -> 8
-            Long -> 1
-          king = getPiece board (5, row)
-          rook = getPiece board (rookColumn, row)
-       in if color == ccolor && king == CP color (King False) && rook == CP color (Rook False)
+advanceBoard :: Board -> Color -> Move -> Either String Board
+advanceBoard board color (start, end) =
+  let cmove = case getPiece board start of
+        CP _ (King _) -> case (start, end) of
+          ((5, 8), (7, 8)) -> Castling Black Short
+          ((5, 8), (3, 8)) -> Castling Black Long
+          ((5, 1), (7, 1)) -> Castling White Short
+          ((5, 1), (3, 1)) -> Castling White Long
+          _ -> Normal (start, end)
+        _ -> Normal (start, end)
+   in case cmove of
+        Normal move ->
+          if isValidMove board color move
             then Right $ movePiece board cmove
-            else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
+            else Left $ "ERROR: Invalid move: " ++ show move
+        Castling ccolor side ->
+          let row = case color of
+                Black -> 8
+                White -> 1
+              rookColumn = case side of
+                Short -> 8
+                Long -> 1
+              king = getPiece board (5, row)
+              rook = getPiece board (rookColumn, row)
+           in if color == ccolor && king == CP color (King False) && rook == CP color (Rook False)
+                then Right $ movePiece board cmove
+                else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
 
 getPositions :: Board -> Color -> [Position]
 getPositions board color =
