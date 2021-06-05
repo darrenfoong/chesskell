@@ -35,14 +35,14 @@ mkBoard =
 
 mkMixedRow :: Color -> [CPiece]
 mkMixedRow color =
-  [ CP color Rook,
+  [ CP color (Rook False),
     CP color Knight,
     CP color Bishop,
     CP color Queen,
-    CP color King,
+    CP color (King False),
     CP color Bishop,
     CP color Knight,
-    CP color Rook
+    CP color (Rook False)
   ]
 
 mkPawnRow :: Color -> [CPiece]
@@ -66,45 +66,53 @@ printRow :: [CPiece] -> String
 printRow = concatMap printPiece
 
 printPiece :: CPiece -> String
-printPiece (CP Black King) = "K"
+printPiece (CP Black (King False)) = "K"
+printPiece (CP Black (King True)) = "L"
 printPiece (CP Black Queen) = "Q"
-printPiece (CP Black Rook) = "R"
+printPiece (CP Black (Rook False)) = "R"
+printPiece (CP Black (Rook True)) = "S"
 printPiece (CP Black Bishop) = "B"
 printPiece (CP Black Knight) = "N"
 printPiece (CP Black Pawn) = "P"
-printPiece (CP White King) = "k"
+printPiece (CP White (King False)) = "k"
+printPiece (CP White (King True)) = "l"
 printPiece (CP White Queen) = "q"
-printPiece (CP White Rook) = "r"
+printPiece (CP White (Rook False)) = "r"
+printPiece (CP White (Rook True)) = "s"
 printPiece (CP White Bishop) = "b"
 printPiece (CP White Knight) = "n"
 printPiece (CP White Pawn) = "p"
 printPiece Null = "#"
 
 unprintPiece :: String -> CPiece
-unprintPiece "K" = CP Black King
+unprintPiece "K" = CP Black (King False)
+unprintPiece "L" = CP Black (King True)
 unprintPiece "Q" = CP Black Queen
-unprintPiece "R" = CP Black Rook
+unprintPiece "R" = CP Black (Rook False)
+unprintPiece "S" = CP Black (Rook True)
 unprintPiece "B" = CP Black Bishop
 unprintPiece "N" = CP Black Knight
 unprintPiece "P" = CP Black Pawn
-unprintPiece "k" = CP White King
+unprintPiece "k" = CP White (King False)
+unprintPiece "l" = CP White (King True)
 unprintPiece "q" = CP White Queen
-unprintPiece "r" = CP White Rook
+unprintPiece "r" = CP White (Rook False)
+unprintPiece "s" = CP White (Rook True)
 unprintPiece "b" = CP White Bishop
 unprintPiece "n" = CP White Knight
 unprintPiece "p" = CP White Pawn
 unprintPiece _ = Null
 
 prettyPrintPiece :: CPiece -> String
-prettyPrintPiece (CP Black King) = "♚"
+prettyPrintPiece (CP Black (King _)) = "♚"
 prettyPrintPiece (CP Black Queen) = "♛"
-prettyPrintPiece (CP Black Rook) = "♜"
+prettyPrintPiece (CP Black (Rook _)) = "♜"
 prettyPrintPiece (CP Black Bishop) = "♝"
 prettyPrintPiece (CP Black Knight) = "♞"
 prettyPrintPiece (CP Black Pawn) = "♟︎"
-prettyPrintPiece (CP White King) = "♔"
+prettyPrintPiece (CP White (King _)) = "♔"
 prettyPrintPiece (CP White Queen) = "♕"
-prettyPrintPiece (CP White Rook) = "♖"
+prettyPrintPiece (CP White (Rook _)) = "♖"
 prettyPrintPiece (CP White Bishop) = "♗"
 prettyPrintPiece (CP White Knight) = "♘"
 prettyPrintPiece (CP White Pawn) = "♙"
@@ -138,11 +146,11 @@ isValidMove board color (start, end) =
 
 checkLineOfSight :: Board -> CPiece -> Move -> Bool
 checkLineOfSight _ Null _ = False
-checkLineOfSight _ (CP _ King) _ = True
+checkLineOfSight _ (CP _ (King _)) _ = True
 checkLineOfSight board (CP color Queen) move =
-  checkLineOfSight board (CP color Rook) move
+  checkLineOfSight board (CP color (Rook False)) move
     || checkLineOfSight board (CP color Bishop) move
-checkLineOfSight board (CP _ Rook) (start, end) = checkLineOfSightPos board (mkPositions start end)
+checkLineOfSight board (CP _ (Rook _)) (start, end) = checkLineOfSightPos board (mkPositions start end)
 checkLineOfSight board (CP _ Bishop) (start, end) = checkLineOfSightPos board (mkPositions start end)
 checkLineOfSight _ (CP _ Knight) _ = True
 checkLineOfSight board (CP _ Pawn) ((sc, sr), (_, er))
@@ -202,9 +210,13 @@ getPositions board color =
     mkCoords
 
 getKingPosition :: Board -> Color -> Maybe Position
-getKingPosition board color = case filter (\p -> getPiece board p == CP color King) (getPositions board color) of
-  [] -> Nothing
-  p : _ -> Just p
+getKingPosition board color =
+  let isKing p = case getPiece board p of
+        CP _ (King _) -> True
+        _ -> False
+   in case filter isKing (getPositions board color) of
+        [] -> Nothing
+        p : _ -> Just p
 
 genPossibleMovesPiece :: Board -> Position -> [Move]
 genPossibleMovesPiece board position = case getPiece board position of

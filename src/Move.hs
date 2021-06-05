@@ -35,14 +35,14 @@ isValidMovePiece (CP White Pawn) False ((sc, sr), (ec, er)) =
 isValidMovePiece piece attack ((sc, sr), (ec, er)) = isValidMovePieceInner piece attack (ec - sc, er - sr)
 
 isValidMovePieceInner :: CPiece -> Bool -> (Int, Int) -> Bool
-isValidMovePieceInner (CP _ King) _ (cdiff, rdiff) =
+isValidMovePieceInner (CP _ (King _)) _ (cdiff, rdiff) =
   (cdiff == 0 && abs rdiff == 1)
     || (rdiff == 0 && abs cdiff == 1)
     || (abs cdiff == abs rdiff && abs cdiff == 1)
 isValidMovePieceInner (CP color Queen) attack move =
-  isValidMovePieceInner (CP color Rook) attack move
+  isValidMovePieceInner (CP color (Rook False)) attack move
     || isValidMovePieceInner (CP color Bishop) attack move
-isValidMovePieceInner (CP _ Rook) _ (cdiff, rdiff) = cdiff == 0 || rdiff == 0
+isValidMovePieceInner (CP _ (Rook _)) _ (cdiff, rdiff) = cdiff == 0 || rdiff == 0
 isValidMovePieceInner (CP _ Bishop) _ (cdiff, rdiff) = abs cdiff == abs rdiff
 isValidMovePieceInner (CP _ Knight) _ (cdiff, rdiff) =
   (abs cdiff == 1 && abs rdiff == 2)

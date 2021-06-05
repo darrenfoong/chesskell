@@ -27,9 +27,9 @@ scoreColorPiece color p@(CP pcolor _) = if color == pcolor then scorePiece p els
 scoreColorPiece _ Null = 0
 
 scorePiece :: CPiece -> Int
-scorePiece (CP _ King) = 0
+scorePiece (CP _ (King _)) = 0
 scorePiece (CP _ Queen) = 9
-scorePiece (CP _ Rook) = 5
+scorePiece (CP _ (Rook _)) = 5
 scorePiece (CP _ Bishop) = 3
 scorePiece (CP _ Knight) = 3
 scorePiece (CP _ Pawn) = 1
@@ -65,7 +65,7 @@ getTable Black = getBlackTable
 -- obtained from https://www.chessprogramming.org/Simplified_Evaluation_Function
 
 getBlackTable :: Piece -> [[Int]]
-getBlackTable King =
+getBlackTable (King _) =
   [ [-30, -40, -40, -50, -50, -40, -40, -30],
     [-30, -40, -40, -50, -50, -40, -40, -30],
     [-30, -40, -40, -50, -50, -40, -40, -30],
@@ -85,7 +85,7 @@ getBlackTable Queen =
     [-10, 0, 5, 0, 0, 0, 0, -10],
     [-20, -10, -10, -5, -5, -10, -10, -20]
   ]
-getBlackTable Rook =
+getBlackTable (Rook _) =
   [ [0, 0, 0, 0, 0, 0, 0, 0],
     [5, 10, 10, 10, 10, 10, 10, 5],
     [-5, 0, 0, 0, 0, 0, 0, -5],

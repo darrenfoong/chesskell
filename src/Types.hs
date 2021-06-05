@@ -9,7 +9,7 @@ module Types
   )
 where
 
-data Piece = King | Queen | Rook | Bishop | Knight | Pawn deriving (Eq)
+data Piece = King Bool | Queen | Rook Bool | Bishop | Knight | Pawn deriving (Eq)
 
 data Color = Black | White deriving (Eq, Show)
 
