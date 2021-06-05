@@ -22,7 +22,7 @@ writeMove :: CMove -> String
 writeMove (Normal ((sc, sr), (ec, er))) =
   let f n = chr $ ord 'a' + n - 1
    in [f sc, intToDigit sr, f ec, intToDigit er]
-writeMove (Castling _ _) = "" -- TODO
+writeMove (Castling color side) = "Castling: " ++ show color ++ " " ++ show side
 
 isValidMovePiece :: CPiece -> Bool -> Move -> Bool
 isValidMovePiece (CP Black Pawn) False ((sc, sr), (ec, er)) =

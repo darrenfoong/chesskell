@@ -23,7 +23,7 @@ type Position = (Int, Int)
 
 type Move = (Position, Position)
 
-data CastlingSide = Short | Long
+data CastlingSide = Short | Long deriving (Show)
 
 data CMove = Normal Move | Castling Color CastlingSide
 
