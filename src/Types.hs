@@ -5,7 +5,7 @@ module Types
     Board,
     Position,
     Move,
-    CastlingSide,
+    CastlingSide (..),
     CMove (..),
     swapColor,
   )
