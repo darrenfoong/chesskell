@@ -227,9 +227,15 @@ advanceBoard board color (start, end) =
               rookColumn = case side of
                 Short -> 8
                 Long -> 1
+              intermediateColumns = case side of
+                Short -> [6, 7]
+                Long -> [2, 3, 4]
               king = getPiece board (5, row)
               rook = getPiece board (rookColumn, row)
-           in if color == ccolor && king == CP color (King False) && rook == CP color (Rook False)
+           in if color == ccolor
+                && king == CP color (King False)
+                && rook == CP color (Rook False)
+                && all (\c -> getPiece board (c, row) == Null) intermediateColumns
                 then Right $ movePiece board cmove
                 else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
 
