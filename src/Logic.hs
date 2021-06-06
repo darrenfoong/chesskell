@@ -8,8 +8,9 @@ where
 import Board (advanceBoard, genPossibleMoves, getKingPosition, isPositionUnderAttack)
 import Data.Either (fromRight)
 import Minimax (minimax, negInfinity, posInfinity)
+import Move (cMoveToMove)
 import System.Random
-import Types (Board, CMove (..), Color (..))
+import Types (Board, CMove (..), CastlingSide (..), Color (..))
 import Utils (shuffle)
 
 isInCheckmate :: Board -> Color -> Bool
@@ -25,12 +26,13 @@ genMove boardScorer gen board color =
         Nothing -> (gen2, Nothing)
         Just (_, m) -> (gen2, Just m)
 
--- TODO Add generation of castling moves here
 genPossibleNonCheckMoves :: Board -> Color -> [CMove]
 genPossibleNonCheckMoves board color = map fst $ filter (\(_, b) -> not $ isInCheck b color) $ genNextMoveBoards board color
 
 genNextMoveBoards :: Board -> Color -> [(CMove, Board)]
 genNextMoveBoards board color =
   let possibleMoves = genPossibleMoves board color
-      possibleMoveBoards = map (\m -> (Normal m, fromRight [] $ advanceBoard board color m)) possibleMoves -- TODO Normal
-   in filter (\(_, b) -> b /= []) possibleMoveBoards
+      possibleMoveBoards = map (\m -> (Normal m, fromRight [] $ advanceBoard board color m)) possibleMoves
+      possibleCastlingMoves = map (Castling color) [Short, Long]
+      possibleCastlingMoveBoards = map (\cm -> (cm, fromRight [] $ advanceBoard board color $ cMoveToMove cm)) possibleCastlingMoves
+   in filter (\(_, b) -> b /= []) (possibleMoveBoards ++ possibleCastlingMoveBoards)
