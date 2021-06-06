@@ -228,8 +228,8 @@ advanceBoard board color (start, end) =
                 Short -> 8
                 Long -> 1
               intermediateColumns = case side of
-                Short -> [6, 7]
-                Long -> [2, 3, 4]
+                Short -> [5, 6, 7]
+                Long -> [2, 3, 4, 5]
               king = getPiece board (5, row)
               rook = getPiece board (rookColumn, row)
            in if color == ccolor
