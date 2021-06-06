@@ -235,7 +235,12 @@ advanceBoard board color (start, end) =
            in if color == ccolor
                 && king == CP color (King False)
                 && rook == CP color (Rook False)
-                && all (\c -> getPiece board (c, row) == Null) intermediateColumns
+                && all
+                  ( \c ->
+                      getPiece board (c, row) == Null
+                        && not (isPositionUnderAttack board color (c, row))
+                  )
+                  intermediateColumns
                 then Right $ movePiece board cmove
                 else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
 
