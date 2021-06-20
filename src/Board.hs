@@ -288,3 +288,9 @@ promotePawns board =
   let firstRow = head board
       lastRow = board !! 7
    in promotePawn firstRow : take 6 (tail board) ++ [promotePawn lastRow]
+
+resetPawns :: Board -> Color -> Board
+resetPawns board color =
+  let resetPawn piece@(CP clr (Pawn True)) = if color == clr then CP color (Pawn False) else piece
+      resetPawn piece = piece
+   in map (map resetPawn) board
