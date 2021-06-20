@@ -132,22 +132,36 @@ readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
 writeBoard :: Board -> String
 writeBoard = concatMap printRow
 
+isEnPassant :: Board -> Color -> Move -> Bool
+isEnPassant board color ((sc, sr), (ec, er)) =
+  let cdiff = ec - sc
+      rdiff = er - sr
+      attack = abs cdiff == 1 && rdiff == (if color == Black then -1 else 1)
+   in attack
+        && getPiece board (ec, er) == Null
+        && getPiece board (ec, er + (if color == Black then 1 else -1)) == CP (swapColor color) (Pawn True)
+
 isValidMove :: Board -> Color -> Move -> Bool
 isValidMove board color (start, end) =
   start /= end
     && let startPiece = getPiece board start
         in case startPiece of
-             CP startColor _ ->
+             CP startColor (Pawn _) ->
                startColor == color
-                 && case getPiece board end of
-                   Null ->
-                     isValidMovePiece startPiece False (start, end)
-                       && checkLineOfSight board startPiece (start, end)
-                   CP endColor _ ->
-                     startColor /= endColor
-                       && isValidMovePiece startPiece True (start, end)
-                       && checkLineOfSight board startPiece (start, end)
+                 && (isEnPassant board color (start, end) || isValidMoveInner board color (start, end) startPiece)
+             CP startColor _ ->
+               startColor == color && isValidMoveInner board color (start, end) startPiece
              Null -> False
+
+isValidMoveInner :: Board -> Color -> Move -> CPiece -> Bool
+isValidMoveInner board startColor (start, end) startPiece = case getPiece board end of
+  Null ->
+    isValidMovePiece startPiece False (start, end)
+      && checkLineOfSight board startPiece (start, end)
+  CP endColor _ ->
+    startColor /= endColor
+      && isValidMovePiece startPiece True (start, end)
+      && checkLineOfSight board startPiece (start, end)
 
 checkLineOfSight :: Board -> CPiece -> Move -> Bool
 checkLineOfSight _ Null _ = False
@@ -216,7 +230,6 @@ movePiece board (EnPassant color (start, end@(ec, er))) =
 
 advanceBoard :: Board -> Color -> Move -> Either String Board
 advanceBoard board color (start, end) =
-  -- TODO Generate en passant captures
   let cmove = case getPiece board start of
         CP _ (King _) -> case (start, end) of
           ((5, 8), (7, 8)) -> Castling Black Short
@@ -225,15 +238,9 @@ advanceBoard board color (start, end) =
           ((5, 1), (3, 1)) -> Castling White Long
           _ -> Normal (start, end)
         CP clr (Pawn _) ->
-          let ((sc, sr), (ec, er)) = (start, end)
-              cdiff = ec - sc
-              rdiff = er - sr
-              attack = abs cdiff == 1 && rdiff == (if clr == Black then -1 else 1)
-           in if attack
-                && getPiece board end == Null
-                && getPiece board (ec, er + (if clr == Black then 1 else -1)) == CP (swapColor clr) (Pawn True)
-                then EnPassant clr (start, end)
-                else Normal (start, end)
+          if isEnPassant board color (start, end)
+            then EnPassant clr (start, end)
+            else Normal (start, end)
         _ -> Normal (start, end)
    in case cmove of
         Normal move ->
