@@ -196,11 +196,7 @@ removePiece board (cn, rn) = alterBoardRow board rn (\r -> alterRow r cn (const 
 movePiece :: Board -> CMove -> Board
 movePiece board (Normal (start, end)) =
   let (intermediateBoard, oldPiece) = removePiece board start
-      rdiff ((_, sr), (_, er)) = abs (er - sr) == 2
-      newPiece = case oldPiece of
-        CP color (Pawn False) -> CP color (Pawn (rdiff (start, end)))
-        _ -> oldPiece
-   in setPiece intermediateBoard end newPiece
+   in setPiece intermediateBoard end oldPiece
 movePiece board (Castling color side) =
   let row = case color of
         Black -> 8
@@ -213,10 +209,14 @@ movePiece board (Castling color side) =
       b3 = setPiece b2 (newRookColumn, row) (CP color (Rook True))
       b4 = setPiece b3 (newKingColumn, row) (CP color (King True))
    in b4
+movePiece board (EnPassant color (start, end@(ec, er))) =
+  let (intermediateBoard, oldPiece) = removePiece board start
+      (intermediateBoard2, _) = removePiece intermediateBoard (ec, er + (if color == Black then 1 else -1))
+   in setPiece intermediateBoard2 end oldPiece
 
 advanceBoard :: Board -> Color -> Move -> Either String Board
 advanceBoard board color (start, end) =
-  -- TODO Implement en passant capture
+  -- TODO Generate en passant captures
   let cmove = case getPiece board start of
         CP _ (King _) -> case (start, end) of
           ((5, 8), (7, 8)) -> Castling Black Short
@@ -224,6 +224,16 @@ advanceBoard board color (start, end) =
           ((5, 1), (7, 1)) -> Castling White Short
           ((5, 1), (3, 1)) -> Castling White Long
           _ -> Normal (start, end)
+        CP clr (Pawn _) ->
+          let ((sc, sr), (ec, er)) = (start, end)
+              cdiff = ec - sc
+              rdiff = er - sr
+              attack = abs cdiff == 1 && rdiff == (if clr == Black then -1 else 1)
+           in if attack
+                && getPiece board end == Null
+                && getPiece board (ec, er + (if clr == Black then 1 else -1)) == CP (swapColor clr) (Pawn True)
+                then EnPassant clr (start, end)
+                else Normal (start, end)
         _ -> Normal (start, end)
    in case cmove of
         Normal move ->
@@ -253,6 +263,10 @@ advanceBoard board color (start, end) =
                   intermediateColumns
                 then Right $ movePiece board cmove
                 else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
+        EnPassant ccolor move ->
+          if color == ccolor
+            then Right $ movePiece board cmove
+            else Left $ "ERROR: Invalid en passant capture: " ++ show move
 
 getPositions :: Board -> Color -> [Position]
 getPositions board color =
