@@ -46,7 +46,7 @@ mkMixedRow color =
   ]
 
 mkPawnRow :: Color -> [CPiece]
-mkPawnRow color = replicate 8 (CP color Pawn)
+mkPawnRow color = replicate 8 (CP color (Pawn False))
 
 mkBlankRow :: [CPiece]
 mkBlankRow = replicate 8 Null
@@ -73,7 +73,8 @@ printPiece (CP Black (Rook False)) = "R"
 printPiece (CP Black (Rook True)) = "S"
 printPiece (CP Black Bishop) = "B"
 printPiece (CP Black Knight) = "N"
-printPiece (CP Black Pawn) = "P"
+printPiece (CP Black (Pawn False)) = "P"
+printPiece (CP Black (Pawn True)) = "O"
 printPiece (CP White (King False)) = "k"
 printPiece (CP White (King True)) = "l"
 printPiece (CP White Queen) = "q"
@@ -81,7 +82,8 @@ printPiece (CP White (Rook False)) = "r"
 printPiece (CP White (Rook True)) = "s"
 printPiece (CP White Bishop) = "b"
 printPiece (CP White Knight) = "n"
-printPiece (CP White Pawn) = "p"
+printPiece (CP White (Pawn False)) = "p"
+printPiece (CP White (Pawn True)) = "o"
 printPiece Null = "#"
 
 unprintPiece :: String -> CPiece
@@ -92,7 +94,8 @@ unprintPiece "R" = CP Black (Rook False)
 unprintPiece "S" = CP Black (Rook True)
 unprintPiece "B" = CP Black Bishop
 unprintPiece "N" = CP Black Knight
-unprintPiece "P" = CP Black Pawn
+unprintPiece "P" = CP Black (Pawn False)
+unprintPiece "O" = CP Black (Pawn True)
 unprintPiece "k" = CP White (King False)
 unprintPiece "l" = CP White (King True)
 unprintPiece "q" = CP White Queen
@@ -100,7 +103,8 @@ unprintPiece "r" = CP White (Rook False)
 unprintPiece "s" = CP White (Rook True)
 unprintPiece "b" = CP White Bishop
 unprintPiece "n" = CP White Knight
-unprintPiece "p" = CP White Pawn
+unprintPiece "p" = CP White (Pawn False)
+unprintPiece "o" = CP White (Pawn True)
 unprintPiece _ = Null
 
 prettyPrintPiece :: CPiece -> String
@@ -109,13 +113,13 @@ prettyPrintPiece (CP Black Queen) = "♛"
 prettyPrintPiece (CP Black (Rook _)) = "♜"
 prettyPrintPiece (CP Black Bishop) = "♝"
 prettyPrintPiece (CP Black Knight) = "♞"
-prettyPrintPiece (CP Black Pawn) = "♟︎"
+prettyPrintPiece (CP Black (Pawn _)) = "♟︎"
 prettyPrintPiece (CP White (King _)) = "♔"
 prettyPrintPiece (CP White Queen) = "♕"
 prettyPrintPiece (CP White (Rook _)) = "♖"
 prettyPrintPiece (CP White Bishop) = "♗"
 prettyPrintPiece (CP White Knight) = "♘"
-prettyPrintPiece (CP White Pawn) = "♙"
+prettyPrintPiece (CP White (Pawn _)) = "♙"
 prettyPrintPiece Null = ""
 
 readBoard :: Text -> Either String Board
@@ -153,7 +157,7 @@ checkLineOfSight board (CP color Queen) move =
 checkLineOfSight board (CP _ (Rook _)) (start, end) = checkLineOfSightPos board (mkPositions start end)
 checkLineOfSight board (CP _ Bishop) (start, end) = checkLineOfSightPos board (mkPositions start end)
 checkLineOfSight _ (CP _ Knight) _ = True
-checkLineOfSight board (CP _ Pawn) ((sc, sr), (_, er))
+checkLineOfSight board (CP _ (Pawn _)) ((sc, sr), (_, er))
   | (er - sr) == 2 = checkLineOfSightPos board [(sc, sr + 1)]
   | (er - sr) == -2 = checkLineOfSightPos board [(sc, sr -1)]
   | otherwise = True
@@ -276,7 +280,7 @@ isPositionUnderAttack board color pos = elem pos $ map snd $ genPossibleMoves bo
 
 promotePawn :: [CPiece] -> [CPiece]
 promotePawn [] = []
-promotePawn (CP color Pawn : ps) = CP color Queen : promotePawn ps
+promotePawn (CP color (Pawn _) : ps) = CP color Queen : promotePawn ps
 promotePawn (p : ps) = p : promotePawn ps
 
 promotePawns :: Board -> Board

@@ -11,7 +11,11 @@ module Types
   )
 where
 
-data Piece = King Bool | Queen | Rook Bool | Bishop | Knight | Pawn deriving (Eq)
+data Piece = King Bool | Queen | Rook Bool | Bishop | Knight | Pawn Bool deriving (Eq)
+
+-- King True/False: castled/uncastled
+-- Rook True/False: castled/uncastled
+-- Pawn True/False: previous move was two squares from starting square/otherwise
 
 data Color = Black | White deriving (Eq, Show)
 

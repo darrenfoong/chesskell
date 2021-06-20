@@ -32,7 +32,7 @@ scorePiece (CP _ Queen) = 9
 scorePiece (CP _ (Rook _)) = 5
 scorePiece (CP _ Bishop) = 3
 scorePiece (CP _ Knight) = 3
-scorePiece (CP _ Pawn) = 1
+scorePiece (CP _ (Pawn _)) = 1
 scorePiece Null = 0
 
 scoreBoardTableInner :: Board -> Color -> Int
@@ -115,7 +115,7 @@ getBlackTable Knight =
     [-40, -20, 0, 5, 5, 0, -20, -40],
     [-50, -40, -30, -30, -30, -30, -40, -50]
   ]
-getBlackTable Pawn =
+getBlackTable (Pawn _) =
   [ [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 50, 50, 50, 50, 50, 50, 50],
     [0, 10, 20, 30, 30, 20, 10, 10],

@@ -33,11 +33,11 @@ cMoveToMove (Castling White Short) = ((5, 1), (7, 1))
 cMoveToMove (Castling White Long) = ((5, 1), (3, 1))
 
 isValidMovePiece :: CPiece -> Bool -> Move -> Bool
-isValidMovePiece (CP Black Pawn) False ((sc, sr), (ec, er)) =
+isValidMovePiece (CP Black (Pawn _)) False ((sc, sr), (ec, er)) =
   let cdiff = ec - sc
       rdiff = er - sr
    in cdiff == 0 && (rdiff == (-1) || (sr == 7 && rdiff == (-2)))
-isValidMovePiece (CP White Pawn) False ((sc, sr), (ec, er)) =
+isValidMovePiece (CP White (Pawn _)) False ((sc, sr), (ec, er)) =
   let cdiff = ec - sc
       rdiff = er - sr
    in cdiff == 0 && (rdiff == 1 || (sr == 2 && rdiff == 2))
@@ -56,6 +56,6 @@ isValidMovePieceInner (CP _ Bishop) _ (cdiff, rdiff) = abs cdiff == abs rdiff
 isValidMovePieceInner (CP _ Knight) _ (cdiff, rdiff) =
   (abs cdiff == 1 && abs rdiff == 2)
     || (abs cdiff == 2 && abs rdiff == 1)
-isValidMovePieceInner (CP Black Pawn) True (cdiff, rdiff) = abs cdiff == 1 && rdiff == (-1)
-isValidMovePieceInner (CP White Pawn) True (cdiff, rdiff) = abs cdiff == 1 && rdiff == 1
+isValidMovePieceInner (CP Black (Pawn _)) True (cdiff, rdiff) = abs cdiff == 1 && rdiff == (-1)
+isValidMovePieceInner (CP White (Pawn _)) True (cdiff, rdiff) = abs cdiff == 1 && rdiff == 1
 isValidMovePieceInner _ _ _ = False
