@@ -216,6 +216,7 @@ movePiece board (Castling color side) =
 
 advanceBoard :: Board -> Color -> Move -> Either String Board
 advanceBoard board color (start, end) =
+  -- TODO Implement en passant capture
   let cmove = case getPiece board start of
         CP _ (King _) -> case (start, end) of
           ((5, 8), (7, 8)) -> Castling Black Short
