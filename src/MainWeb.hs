@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE ViewPatterns #-}
 
-import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, promotePawns, readBoard, writeBoard)
+import Board (advanceBoard, getPiece, mkBoard, prettyPrintPiece, promotePawns, readBoard, resetPawns, writeBoard)
 import Data.Char
 import Data.Maybe
 import Data.Text (Text, append, unpack)
@@ -86,12 +86,14 @@ getHomeR = do
   let color = White
 
   let ePreviousBoardWithWhite =
-        promotePawns <$> case mWhiteMove of
-          Nothing -> ePreviousBoard
-          Just ePreviousWhiteMove -> do
-            previousWhiteMove <- ePreviousWhiteMove
-            previousBoard <- ePreviousBoard
-            advanceBoard previousBoard color previousWhiteMove
+        (\b -> resetPawns b Black) . promotePawns
+          <$> ( case mWhiteMove of
+                  Nothing -> ePreviousBoard
+                  Just ePreviousWhiteMove -> do
+                    previousWhiteMove <- ePreviousWhiteMove
+                    previousBoard <- ePreviousBoard
+                    advanceBoard previousBoard color previousWhiteMove
+              )
 
   gen <- liftIO newStdGen
 
@@ -103,7 +105,7 @@ getHomeR = do
            in Right mCMove
         PendingMoveEnd -> Right Nothing
   let ePreviousBoardWithBlack =
-        promotePawns <$> do
+        (\b -> resetPawns b White) . promotePawns <$> do
           mBlackCMove <- emBlackCMove
           case mBlackCMove of
             Nothing -> ePreviousBoardWithWhite

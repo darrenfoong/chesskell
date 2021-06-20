@@ -13,6 +13,7 @@ module Board
     genPossibleMoves,
     isPositionUnderAttack,
     promotePawns,
+    resetPawns,
   )
 where
 
