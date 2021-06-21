@@ -145,15 +145,12 @@ isCastling board color (start, end) =
           let row = case clr of
                 Black -> 8
                 White -> 1
-              rookColumn = case side of
-                Short -> 8
-                Long -> 1
-              intermediateColumns = case side of
-                Short -> [6, 7]
-                Long -> [2, 3, 4]
+              (rookColumn, intermediateColumns) = case side of
+                Short -> (8, [7, 6])
+                Long -> (1, [2, 3, 4])
               king = getPiece board (5, row)
               rook = getPiece board (rookColumn, row)
-           in clr == color
+           in color == clr
                 && king == CP clr (King False)
                 && rook == CP clr (Rook False)
                 && all
@@ -184,10 +181,13 @@ isValidMove board color includesCastling (start, end) =
         in case startPiece of
              CP startColor piece ->
                let predicate = case piece of
-                     King False -> if includesCastling then isCastling board color else const False
+                     King False ->
+                       if includesCastling
+                         then isCastling board color
+                         else const False
                      Pawn _ -> isEnPassant board color
                      _ -> const False
-                in startColor == color
+                in color == startColor
                      && (predicate (start, end) || isValidMoveInner board color (start, end) startPiece)
              Null -> False
 
@@ -271,35 +271,35 @@ movePiece board (EnPassant color (start, end@(ec, er))) =
    in setPiece intermediateBoard2 end oldPiece
 
 advanceBoard :: Board -> Color -> Move -> Either String Board
-advanceBoard board color (start, end) =
+advanceBoard board color move@(start, end) =
   let cmove = case getPiece board start of
         CP _ (King False) ->
-          if isCastling board color (start, end)
-            then case (start, end) of
+          if isCastling board color move
+            then case move of
               ((5, 8), (7, 8)) -> Castling Black Short
               ((5, 8), (3, 8)) -> Castling Black Long
               ((5, 1), (7, 1)) -> Castling White Short
               ((5, 1), (3, 1)) -> Castling White Long
-              _ -> Normal (start, end)
-            else Normal (start, end)
-        CP clr (Pawn _) ->
-          if isEnPassant board color (start, end)
-            then EnPassant clr (start, end)
-            else Normal (start, end)
-        _ -> Normal (start, end)
+              _ -> Normal move
+            else Normal move
+        CP _ (Pawn _) ->
+          if isEnPassant board color move
+            then EnPassant color move
+            else Normal move
+        _ -> Normal move
    in case cmove of
-        Normal move ->
-          if isValidMove board color False move
+        Normal mv ->
+          if isValidMove board color False mv
             then Right $ movePiece board cmove
-            else Left $ "ERROR: Invalid move: " ++ show move
-        Castling ccolor side ->
-          if color == ccolor
+            else Left $ "ERROR: Invalid move: " ++ show mv
+        Castling clr side ->
+          if color == clr
             then Right $ movePiece board cmove
             else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
-        EnPassant ccolor move ->
-          if color == ccolor
+        EnPassant clr mv ->
+          if color == clr
             then Right $ movePiece board cmove
-            else Left $ "ERROR: Invalid en passant capture: " ++ show move
+            else Left $ "ERROR: Invalid en passant capture: " ++ show mv
 
 getPositions :: Board -> Color -> [Position]
 getPositions board color =
