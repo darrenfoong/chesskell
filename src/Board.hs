@@ -163,7 +163,7 @@ isCastling board color (start, end) =
                   intermediateColumns
                 && all
                   ( \c ->
-                      not (isPositionUnderAttack board clr (c, row))
+                      not (isPositionUnderAttack board clr (c, row)) -- TODO recursive! dangerous
                   )
                   (5 : intermediateColumns)
         _ -> False
