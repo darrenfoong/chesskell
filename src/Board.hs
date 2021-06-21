@@ -271,7 +271,7 @@ movePiece board (EnPassant color (start, end@(ec, er))) =
    in setPiece intermediateBoard2 end oldPiece
 
 advanceBoard :: Board -> Color -> Move -> Either String Board
-advanceBoard board color move@(start, end) =
+advanceBoard board color move@(start, _) =
   let cmove = case getPiece board start of
         CP _ (King False) ->
           if isCastling board color move
