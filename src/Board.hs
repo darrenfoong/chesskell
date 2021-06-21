@@ -149,8 +149,8 @@ isCastling board color (start, end) =
                 Short -> 8
                 Long -> 1
               intermediateColumns = case side of
-                Short -> [5, 6, 7]
-                Long -> [2, 3, 4, 5]
+                Short -> [6, 7]
+                Long -> [2, 3, 4]
               king = getPiece board (5, row)
               rook = getPiece board (rookColumn, row)
            in clr == color
@@ -159,9 +159,13 @@ isCastling board color (start, end) =
                 && all
                   ( \c ->
                       getPiece board (c, row) == Null
-                        && not (isPositionUnderAttack board clr (c, row))
                   )
                   intermediateColumns
+                && all
+                  ( \c ->
+                      not (isPositionUnderAttack board clr (c, row))
+                  )
+                  (5 : intermediateColumns)
         _ -> False
 
 isEnPassant :: Board -> Color -> Move -> Bool
