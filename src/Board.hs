@@ -179,14 +179,13 @@ isValidMove board color (start, end) =
   start /= end
     && let startPiece = getPiece board start
         in case startPiece of
-             CP startColor (King False) ->
-               startColor == color
-                 && (isCastling board color (start, end) || isValidMoveInner board color (start, end) startPiece)
-             CP startColor (Pawn _) ->
-               startColor == color
-                 && (isEnPassant board color (start, end) || isValidMoveInner board color (start, end) startPiece)
-             CP startColor _ ->
-               startColor == color && isValidMoveInner board color (start, end) startPiece
+             CP startColor piece ->
+               let predicate = case piece of
+                     King False -> isCastling board color
+                     Pawn _ -> isEnPassant board color
+                     _ -> const False
+                in startColor == color
+                     && (predicate (start, end) || isValidMoveInner board color (start, end) startPiece)
              Null -> False
 
 isValidMoveInner :: Board -> Color -> Move -> CPiece -> Bool
