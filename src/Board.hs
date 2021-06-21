@@ -132,6 +132,39 @@ readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
 writeBoard :: Board -> String
 writeBoard = concatMap printRow
 
+isCastling :: Board -> Color -> Move -> Bool
+isCastling board color (start, end) =
+  let cmove = case (start, end) of
+        ((5, 8), (7, 8)) -> Just $ Castling Black Short
+        ((5, 8), (3, 8)) -> Just $ Castling Black Long
+        ((5, 1), (7, 1)) -> Just $ Castling White Short
+        ((5, 1), (3, 1)) -> Just $ Castling White Long
+        _ -> Nothing
+   in case cmove of
+        Just (Castling clr side) ->
+          let row = case clr of
+                Black -> 8
+                White -> 1
+              rookColumn = case side of
+                Short -> 8
+                Long -> 1
+              intermediateColumns = case side of
+                Short -> [5, 6, 7]
+                Long -> [2, 3, 4, 5]
+              king = getPiece board (5, row)
+              rook = getPiece board (rookColumn, row)
+           in clr == color
+                && king == CP clr (King False)
+                && rook == CP clr (Rook False)
+                && all
+                  ( \c ->
+                      getPiece board (c, row) == Null
+                        && not (isPositionUnderAttack board clr (c, row))
+                  )
+                  intermediateColumns
+        Just _ -> False
+        Nothing -> False
+
 isEnPassant :: Board -> Color -> Move -> Bool
 isEnPassant board color ((sc, sr), (ec, er)) =
   let cdiff = ec - sc
@@ -146,6 +179,9 @@ isValidMove board color (start, end) =
   start /= end
     && let startPiece = getPiece board start
         in case startPiece of
+             CP startColor (King False) ->
+               startColor == color
+                 && (isCastling board color (start, end) || isValidMoveInner board color (start, end) startPiece)
              CP startColor (Pawn _) ->
                startColor == color
                  && (isEnPassant board color (start, end) || isValidMoveInner board color (start, end) startPiece)
@@ -235,12 +271,15 @@ movePiece board (EnPassant color (start, end@(ec, er))) =
 advanceBoard :: Board -> Color -> Move -> Either String Board
 advanceBoard board color (start, end) =
   let cmove = case getPiece board start of
-        CP _ (King _) -> case (start, end) of
-          ((5, 8), (7, 8)) -> Castling Black Short
-          ((5, 8), (3, 8)) -> Castling Black Long
-          ((5, 1), (7, 1)) -> Castling White Short
-          ((5, 1), (3, 1)) -> Castling White Long
-          _ -> Normal (start, end)
+        CP _ (King False) ->
+          if isCastling board color (start, end)
+            then case (start, end) of
+              ((5, 8), (7, 8)) -> Castling Black Short
+              ((5, 8), (3, 8)) -> Castling Black Long
+              ((5, 1), (7, 1)) -> Castling White Short
+              ((5, 1), (3, 1)) -> Castling White Long
+              _ -> Normal (start, end)
+            else Normal (start, end)
         CP clr (Pawn _) ->
           if isEnPassant board color (start, end)
             then EnPassant clr (start, end)
@@ -252,28 +291,9 @@ advanceBoard board color (start, end) =
             then Right $ movePiece board cmove
             else Left $ "ERROR: Invalid move: " ++ show move
         Castling ccolor side ->
-          let row = case color of
-                Black -> 8
-                White -> 1
-              rookColumn = case side of
-                Short -> 8
-                Long -> 1
-              intermediateColumns = case side of
-                Short -> [5, 6, 7]
-                Long -> [2, 3, 4, 5]
-              king = getPiece board (5, row)
-              rook = getPiece board (rookColumn, row)
-           in if color == ccolor
-                && king == CP color (King False)
-                && rook == CP color (Rook False)
-                && all
-                  ( \c ->
-                      getPiece board (c, row) == Null
-                        && not (isPositionUnderAttack board color (c, row))
-                  )
-                  intermediateColumns
-                then Right $ movePiece board cmove
-                else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
+          if color == ccolor
+            then Right $ movePiece board cmove
+            else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
         EnPassant ccolor move ->
           if color == ccolor
             then Right $ movePiece board cmove

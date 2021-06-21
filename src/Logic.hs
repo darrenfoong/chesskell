@@ -33,6 +33,4 @@ genNextMoveBoards :: Board -> Color -> [(CMove, Board)]
 genNextMoveBoards board color =
   let possibleMoves = genPossibleMoves board color
       possibleMoveBoards = map (\m -> (Normal m, fromRight [] $ advanceBoard board color m)) possibleMoves
-      possibleCastlingMoves = map (Castling color) [Short, Long]
-      possibleCastlingMoveBoards = map (\cm -> (cm, fromRight [] $ advanceBoard board color $ cMoveToMove cm)) possibleCastlingMoves
-   in filter (\(_, b) -> b /= []) (possibleMoveBoards ++ possibleCastlingMoveBoards)
+   in filter (\(_, b) -> b /= []) possibleMoveBoards
