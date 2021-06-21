@@ -162,8 +162,7 @@ isCastling board color (start, end) =
                         && not (isPositionUnderAttack board clr (c, row))
                   )
                   intermediateColumns
-        Just _ -> False
-        Nothing -> False
+        _ -> False
 
 isEnPassant :: Board -> Color -> Move -> Bool
 isEnPassant board color ((sc, sr), (ec, er)) =
