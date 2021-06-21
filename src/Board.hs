@@ -163,7 +163,7 @@ isCastling board color (start, end) =
                   intermediateColumns
                 && all
                   ( \c ->
-                      not (isPositionUnderAttack board clr (c, row)) -- TODO recursive! dangerous
+                      not (isPositionUnderAttack board clr (c, row))
                   )
                   (5 : intermediateColumns)
         _ -> False
@@ -177,14 +177,14 @@ isEnPassant board color ((sc, sr), (ec, er)) =
         && getPiece board (ec, er) == Null
         && getPiece board (ec, er + (if color == Black then 1 else -1)) == CP (swapColor color) (Pawn True)
 
-isValidMove :: Board -> Color -> Move -> Bool
-isValidMove board color (start, end) =
+isValidMove :: Board -> Color -> Bool -> Move -> Bool
+isValidMove board color includesCastling (start, end) =
   start /= end
     && let startPiece = getPiece board start
         in case startPiece of
              CP startColor piece ->
                let predicate = case piece of
-                     King False -> isCastling board color
+                     King False -> if includesCastling then isCastling board color else const False
                      Pawn _ -> isEnPassant board color
                      _ -> const False
                 in startColor == color
@@ -289,7 +289,7 @@ advanceBoard board color (start, end) =
         _ -> Normal (start, end)
    in case cmove of
         Normal move ->
-          if isValidMove board color move
+          if isValidMove board color False move
             then Right $ movePiece board cmove
             else Left $ "ERROR: Invalid move: " ++ show move
         Castling ccolor side ->
@@ -320,16 +320,16 @@ getKingPosition board color =
         [] -> Nothing
         p : _ -> Just p
 
-genPossibleMovesPiece :: Board -> Position -> [Move]
-genPossibleMovesPiece board position = case getPiece board position of
-  CP color _ -> filter (isValidMove board color) (map (\pos -> (position, pos)) mkCoords)
+genPossibleMovesPiece :: Board -> Bool -> Position -> [Move]
+genPossibleMovesPiece board includesCastling position = case getPiece board position of
+  CP color _ -> filter (isValidMove board color includesCastling) (map (\pos -> (position, pos)) mkCoords)
   _ -> []
 
-genPossibleMoves :: Board -> Color -> [Move]
-genPossibleMoves board color = concatMap (genPossibleMovesPiece board) (getPositions board color)
+genPossibleMoves :: Board -> Color -> Bool -> [Move]
+genPossibleMoves board color includesCastling = concatMap (genPossibleMovesPiece board includesCastling) (getPositions board color)
 
 isPositionUnderAttack :: Board -> Color -> Position -> Bool
-isPositionUnderAttack board color pos = elem pos $ map snd $ genPossibleMoves board $ swapColor color
+isPositionUnderAttack board color pos = elem pos $ map snd $ genPossibleMoves board (swapColor color) False
 
 promotePawn :: [CPiece] -> [CPiece]
 promotePawn [] = []
