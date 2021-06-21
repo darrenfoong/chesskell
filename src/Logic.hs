@@ -8,9 +8,8 @@ where
 import Board (advanceBoard, genPossibleMoves, getKingPosition, isPositionUnderAttack)
 import Data.Either (fromRight)
 import Minimax (minimax, negInfinity, posInfinity)
-import Move (cMoveToMove)
 import System.Random
-import Types (Board, CMove (..), CastlingSide (..), Color (..))
+import Types (Board, CMove (..), Color (..))
 import Utils (shuffle)
 
 isInCheckmate :: Board -> Color -> Bool
