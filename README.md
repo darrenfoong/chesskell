@@ -25,14 +25,13 @@ goal, as well as to:
   
 The program is laughably slow and weak at chess. A list of to-dos:
 
-1. Implement _en passant_.
-2. Improve the web user interface (and stop play after checkmate).
-3. Improve performance.
-4. Improve the web user interface to make it look nicer in Chrome
+1. Improve the web user interface (and stop play after checkmate).
+2. Improve performance.
+3. Improve the web user interface to make it look nicer in Chrome
    (currently tested only in Firefox).
-5. Make the command line interface work (this was before Yesod came
+4. Make the command line interface work (this was before Yesod came
    along).
-6. Implement persistence to host multiple sessions/games.
+5. Implement persistence to host multiple sessions/games.
 
 ## Formatting
 
