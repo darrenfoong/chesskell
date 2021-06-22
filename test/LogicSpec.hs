@@ -16,14 +16,14 @@ spec = do
             fromRight [] $
               readBoard $
                 pack
-                  "########\
-                  \########\
-                  \########\
-                  \########\
-                  \########\
-                  \#####q#r\
-                  \########\
-                  \#####r#K"
+                  "........\
+                  \........\
+                  \........\
+                  \........\
+                  \........\
+                  \.....q.r\
+                  \........\
+                  \.....r.K"
       isInCheckmate board Black `shouldBe` True
 
     it "detects checkmate for Black King" $ do
@@ -31,12 +31,12 @@ spec = do
             fromRight [] $
               readBoard $
                 pack
-                  "rnbqk##r\
-                  \pPpp#ppp\
-                  \########\
-                  \####p###\
-                  \######n#\
-                  \########\
+                  "rnbqk..r\
+                  \pPpp.ppp\
+                  \........\
+                  \....p...\
+                  \......n.\
+                  \........\
                   \RPPPPbPP\
-                  \#NBQKBNR"
+                  \.NBQKBNR"
       isInCheckmate board Black `shouldBe` True

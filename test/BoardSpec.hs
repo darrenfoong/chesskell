@@ -14,10 +14,10 @@ spec = do
       let boardStr =
             "rnbqkbnr\
             \pppppppp\
-            \########\
-            \########\
-            \########\
-            \########\
+            \........\
+            \........\
+            \........\
+            \........\
             \PPPPPPPP\
             \RNBQKBNR"
       let deserializedBoard = fromRight [] $ readBoard $ pack boardStr
@@ -31,19 +31,91 @@ spec = do
                 pack
                   "rnbqkbnr\
                   \pppppppp\
-                  \########\
-                  \########\
-                  \########\
-                  \########\
+                  \........\
+                  \........\
+                  \........\
+                  \........\
                   \PPPPPPPP\
-                  \RNBQK##R"
+                  \RNBQK..R"
       let advancedBoard = fromRight [] $ advanceBoard board Black ((5, 8), (7, 8))
       writeBoard advancedBoard
         `shouldBe` "rnbqkbnr\
                    \pppppppp\
-                   \########\
-                   \########\
-                   \########\
-                   \########\
+                   \........\
+                   \........\
+                   \........\
+                   \........\
                    \PPPPPPPP\
-                   \RNBQ#SL#"
+                   \RNBQ.SL."
+
+    it "accepts valid castling (black long)" $ do
+      let board =
+            fromRight [] $
+              readBoard $
+                pack
+                  "rnbqkbnr\
+                  \pppppppp\
+                  \........\
+                  \........\
+                  \........\
+                  \........\
+                  \PPPPPPPP\
+                  \R...KBNR"
+      let advancedBoard = fromRight [] $ advanceBoard board Black ((5, 8), (3, 8))
+      writeBoard advancedBoard
+        `shouldBe` "rnbqkbnr\
+                   \pppppppp\
+                   \........\
+                   \........\
+                   \........\
+                   \........\
+                   \PPPPPPPP\
+                   \..LS.BNR"
+                   
+    it "accepts valid castling (white short)" $ do
+      let board =
+            fromRight [] $
+              readBoard $
+                pack
+                  "rnbqk..r\
+                  \pppppppp\
+                  \........\
+                  \........\
+                  \........\
+                  \........\
+                  \PPPPPPPP\
+                  \RNBQKBNR"
+      let advancedBoard = fromRight [] $ advanceBoard board White ((5, 1), (7, 1))
+      writeBoard advancedBoard
+        `shouldBe` "rnbq.sl.\
+                   \pppppppp\
+                   \........\
+                   \........\
+                   \........\
+                   \........\
+                   \PPPPPPPP\
+                   \RNBQKBNR"
+                   
+    it "accepts valid castling (white long)" $ do
+      let board =
+            fromRight [] $
+              readBoard $
+                pack
+                  "r...kbnr\
+                  \pppppppp\
+                  \........\
+                  \........\
+                  \........\
+                  \........\
+                  \PPPPPPPP\
+                  \RNBQKBNR"
+      let advancedBoard = fromRight [] $ advanceBoard board White ((5, 1), (3, 1))
+      writeBoard advancedBoard
+        `shouldBe` "..ls.bnr\
+                   \pppppppp\
+                   \........\
+                   \........\
+                   \........\
+                   \........\
+                   \PPPPPPPP\
+                   \RNBQKBNR"

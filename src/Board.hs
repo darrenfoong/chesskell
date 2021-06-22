@@ -86,7 +86,7 @@ printPiece (CP White Bishop) = "b"
 printPiece (CP White Knight) = "n"
 printPiece (CP White (Pawn False)) = "p"
 printPiece (CP White (Pawn True)) = "o"
-printPiece Null = "#"
+printPiece Null = "."
 
 unprintPiece :: String -> CPiece
 unprintPiece "K" = CP Black (King False)
