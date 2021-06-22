@@ -1,6 +1,7 @@
 module LogicSpec where
 
 import Board (mkBoard, readBoard)
+import Data.Either (fromRight)
 import Data.Text (pack)
 import Logic (isInCheckmate)
 import Test.Hspec
@@ -11,13 +12,31 @@ spec :: Spec
 spec = do
   describe "isInCheckmate" $ do
     it "detects checkmate for Black King" $ do
-      let board = case readBoard $ pack "#############################################q#r#############r#K" of
-            Left _ -> mkBoard
-            Right b -> b
+      let board =
+            fromRight [] $
+              readBoard $
+                pack
+                  "########\
+                  \########\
+                  \########\
+                  \########\
+                  \########\
+                  \#####q#r\
+                  \########\
+                  \#####r#K"
       isInCheckmate board Black `shouldBe` True
 
     it "detects checkmate for Black King" $ do
-      let board = case readBoard $ pack "rnbqk##rpPpp#ppp############p#########n#########RPPPPbPP#NBQKBNR" of
-            Left _ -> mkBoard
-            Right b -> b
+      let board =
+            fromRight [] $
+              readBoard $
+                pack
+                  "rnbqk##r\
+                  \pPpp#ppp\
+                  \########\
+                  \####p###\
+                  \######n#\
+                  \########\
+                  \RPPPPbPP\
+                  \#NBQKBNR"
       isInCheckmate board Black `shouldBe` True

@@ -20,9 +20,7 @@ spec = do
             \########\
             \PPPPPPPP\
             \RNBQKBNR"
-      let deserializedBoard = case readBoard $ pack boardStr of
-            Left _ -> []
-            Right board -> board
+      let deserializedBoard = fromRight [] $ readBoard $ pack boardStr
       writeBoard deserializedBoard `shouldBe` boardStr
 
   describe "advanceBoard" $ do
