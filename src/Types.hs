@@ -13,8 +13,8 @@ where
 
 data Piece = King Bool | Queen | Rook Bool | Bishop | Knight | Pawn Bool deriving (Eq)
 
--- King True/False: castled/uncastled
--- Rook True/False: castled/uncastled
+-- King True/False: previously moved/not yet moved
+-- Rook True/False: previously moved/not yetunmoved
 -- Pawn True/False: previous move was two squares from starting square/otherwise
 
 data Color = Black | White deriving (Eq, Show)
