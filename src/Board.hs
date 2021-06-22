@@ -125,7 +125,7 @@ prettyPrintPiece (CP White (Pawn _)) = "♙"
 prettyPrintPiece Null = ""
 
 readBoard :: Text -> Either String Board
-readBoard boardStr = Right (map readRow $ chunksOf 8 boardStr)
+readBoard boardStr = Right $ map readRow $ chunksOf 8 boardStr
 
 readRow :: Text -> [CPiece]
 readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
@@ -245,7 +245,7 @@ movePiece board (Normal (start, end)) =
       newPiece = case oldPiece of
         CP color (King False) -> CP color (King True)
         CP color (Rook False) -> CP color (Rook True)
-        CP color (Pawn False) -> CP color (Pawn (rdiff (start, end)))
+        CP color (Pawn False) -> CP color (Pawn $ rdiff (start, end))
         _ -> oldPiece
    in setPiece b1 end newPiece
 movePiece board (Castling color side) =
