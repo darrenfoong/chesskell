@@ -248,14 +248,14 @@ removePiece board (cn, rn) = alterBoardRow board rn (\r -> alterRow r cn (const 
 
 movePiece :: Board -> CMove -> Board
 movePiece board (Normal (start, end)) =
-  let (intermediateBoard, oldPiece) = removePiece board start
+  let (b1, oldPiece) = removePiece board start
       rdiff ((_, sr), (_, er)) = abs (er - sr) == 2
       newPiece = case oldPiece of
         CP color (King False) -> CP color (King True)
         CP color (Rook False) -> CP color (Rook True)
         CP color (Pawn False) -> CP color (Pawn (rdiff (start, end)))
         _ -> oldPiece
-   in setPiece intermediateBoard end newPiece
+   in setPiece b1 end newPiece
 movePiece board (Castling color side) =
   let row = case color of
         Black -> 8
