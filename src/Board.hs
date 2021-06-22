@@ -157,7 +157,7 @@ isCastling board color move =
             && king == CP clr (King False)
             && rook == CP clr (Rook False)
             && all (\c -> getPiece board (c, row) == Null) intermediateColumns
-            && all (\c -> not (isPositionUnderAttack board clr (c, row))) (5 : intermediateColumns)
+            && all (\c -> not $ isPositionUnderAttack board clr (c, row)) (5 : intermediateColumns)
     _ -> False
 
 isEnPassant :: Board -> Color -> Move -> Bool
