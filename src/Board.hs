@@ -17,6 +17,7 @@ module Board
   )
 where
 
+import Data.Maybe (fromMaybe)
 import Data.Text (Text, chunksOf, unpack)
 import Move (isValidMovePiece)
 import Position (mkPositions)
@@ -132,38 +133,40 @@ readRow rowStr = map (unprintPiece . unpack) $ chunksOf 1 rowStr
 writeBoard :: Board -> String
 writeBoard = concatMap printRow
 
+moveToCastling :: Move -> Maybe CMove
+moveToCastling move = case move of
+  ((5, 8), (7, 8)) -> Just $ Castling Black Short
+  ((5, 8), (3, 8)) -> Just $ Castling Black Long
+  ((5, 1), (7, 1)) -> Just $ Castling White Short
+  ((5, 1), (3, 1)) -> Just $ Castling White Long
+  _ -> Nothing
+
 isCastling :: Board -> Color -> Move -> Bool
-isCastling board color (start, end) =
-  let cmove = case (start, end) of
-        ((5, 8), (7, 8)) -> Just $ Castling Black Short
-        ((5, 8), (3, 8)) -> Just $ Castling Black Long
-        ((5, 1), (7, 1)) -> Just $ Castling White Short
-        ((5, 1), (3, 1)) -> Just $ Castling White Long
-        _ -> Nothing
-   in case cmove of
-        Just (Castling clr side) ->
-          let row = case clr of
-                Black -> 8
-                White -> 1
-              (rookColumn, intermediateColumns) = case side of
-                Short -> (8, [7, 6])
-                Long -> (1, [2, 3, 4])
-              king = getPiece board (5, row)
-              rook = getPiece board (rookColumn, row)
-           in color == clr
-                && king == CP clr (King False)
-                && rook == CP clr (Rook False)
-                && all
-                  ( \c ->
-                      getPiece board (c, row) == Null
-                  )
-                  intermediateColumns
-                && all
-                  ( \c ->
-                      not (isPositionUnderAttack board clr (c, row))
-                  )
-                  (5 : intermediateColumns)
-        _ -> False
+isCastling board color move =
+  case moveToCastling move of
+    Just (Castling clr side) ->
+      let row = case clr of
+            Black -> 8
+            White -> 1
+          (rookColumn, intermediateColumns) = case side of
+            Short -> (8, [7, 6])
+            Long -> (1, [2, 3, 4])
+          king = getPiece board (5, row)
+          rook = getPiece board (rookColumn, row)
+       in color == clr
+            && king == CP clr (King False)
+            && rook == CP clr (Rook False)
+            && all
+              ( \c ->
+                  getPiece board (c, row) == Null
+              )
+              intermediateColumns
+            && all
+              ( \c ->
+                  not (isPositionUnderAttack board clr (c, row))
+              )
+              (5 : intermediateColumns)
+    _ -> False
 
 isEnPassant :: Board -> Color -> Move -> Bool
 isEnPassant board color ((sc, sr), (ec, er)) =
@@ -277,12 +280,7 @@ advanceBoard board color move@(start, _) =
   let cmove = case getPiece board start of
         CP _ (King False) ->
           if isCastling board color move
-            then case move of
-              ((5, 8), (7, 8)) -> Castling Black Short
-              ((5, 8), (3, 8)) -> Castling Black Long
-              ((5, 1), (7, 1)) -> Castling White Short
-              ((5, 1), (3, 1)) -> Castling White Long
-              _ -> Normal move
+            then fromMaybe (Normal move) $ moveToCastling move
             else Normal move
         CP _ (Pawn _) ->
           if isEnPassant board color move
