@@ -287,19 +287,9 @@ advanceBoard board color move@(start, _) =
             then EnPassant color move
             else Normal move
         _ -> Normal move
-   in case cmove of
-        Normal mv ->
-          if isValidMove board color False mv
-            then Right $ movePiece board cmove
-            else Left $ "ERROR: Invalid move: " ++ show mv
-        Castling clr side ->
-          if color == clr
-            then Right $ movePiece board cmove
-            else Left $ "ERROR: Invalid castling move: " ++ show color ++ " " ++ show side
-        EnPassant clr mv ->
-          if color == clr
-            then Right $ movePiece board cmove
-            else Left $ "ERROR: Invalid en passant capture: " ++ show mv
+   in if isValidMove board color True move
+        then Right $ movePiece board cmove
+        else Left $ "ERROR: Invalid move: " ++ show cmove
 
 getPositions :: Board -> Color -> [Position]
 getPositions board color =

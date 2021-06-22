@@ -29,7 +29,7 @@ type Move = (Position, Position)
 
 data CastlingSide = Short | Long deriving (Show)
 
-data CMove = Normal Move | Castling Color CastlingSide | EnPassant Color Move
+data CMove = Normal Move | Castling Color CastlingSide | EnPassant Color Move deriving (Show)
 
 swapColor :: Color -> Color
 swapColor Black = White
