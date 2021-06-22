@@ -269,9 +269,9 @@ movePiece board (Castling color side) =
       b4 = setPiece b3 (newKingColumn, row) (CP color (King True))
    in b4
 movePiece board (EnPassant color (start, end@(ec, er))) =
-  let (intermediateBoard, oldPiece) = removePiece board start
-      (intermediateBoard2, _) = removePiece intermediateBoard (ec, er + (if color == Black then 1 else -1))
-   in setPiece intermediateBoard2 end oldPiece
+  let (b1, oldPiece) = removePiece board start
+      (b2, _) = removePiece b1 (ec, er + (if color == Black then 1 else -1))
+   in setPiece b2 end oldPiece
 
 advanceBoard :: Board -> Color -> Move -> Either String Board
 advanceBoard board color move@(start, _) =
