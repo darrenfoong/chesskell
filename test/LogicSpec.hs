@@ -14,10 +14,10 @@ spec = do
       let board = case readBoard $ pack "#############################################q#r#############r#K" of
             Left _ -> mkBoard
             Right b -> b
-      isInCheckmate Black board `shouldBe` True
+      isInCheckmate board Black `shouldBe` True
 
     it "detects checkmate for Black King" $ do
       let board = case readBoard $ pack "rnbqk##rpPpp#ppp############p#########n#########RPPPPbPP#NBQKBNR" of
             Left _ -> mkBoard
             Right b -> b
-      isInCheckmate Black board `shouldBe` True
+      isInCheckmate board Black `shouldBe` True

@@ -44,6 +44,7 @@ hlint src
 
 ```
 stack build
+stack test
 ```
 
 ## Running
