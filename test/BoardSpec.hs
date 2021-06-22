@@ -1,7 +1,7 @@
 module BoardSpec where
 
 import Board (advanceBoard, readBoard, writeBoard)
-import Data.Either (fromRight)
+import Data.Either (fromLeft, fromRight)
 import Data.Text (pack)
 import Test.Hspec
 import Types (Color (..))
@@ -71,7 +71,7 @@ spec = do
                    \........\
                    \PPPPPPPP\
                    \..LS.BNR"
-                   
+
     it "accepts valid castling (white short)" $ do
       let board =
             fromRight [] $
@@ -95,7 +95,7 @@ spec = do
                    \........\
                    \PPPPPPPP\
                    \RNBQKBNR"
-                   
+
     it "accepts valid castling (white long)" $ do
       let board =
             fromRight [] $
@@ -119,3 +119,43 @@ spec = do
                    \........\
                    \PPPPPPPP\
                    \RNBQKBNR"
+
+    it "accepts en passant" $ do
+      let board =
+            fromRight [] $
+              readBoard $
+                pack
+                  "rnbqkbnr\
+                  \ppppppp.\
+                  \........\
+                  \........\
+                  \......Op\
+                  \........\
+                  \PPPPPP.P\
+                  \RNBQKBNR"
+      let advancedBoard = fromRight [] $ advanceBoard board White ((8, 5), (7, 6))
+      writeBoard advancedBoard
+        `shouldBe` "rnbqkbnr\
+                   \ppppppp.\
+                   \........\
+                   \........\
+                   \........\
+                   \......p.\
+                   \PPPPPP.P\
+                   \RNBQKBNR"
+
+    it "rejects invalid en passant" $ do
+      let board =
+            fromRight [] $
+              readBoard $
+                pack
+                  "rnbqkbnr\
+                  \ppppppp.\
+                  \........\
+                  \........\
+                  \......Pp\
+                  \........\
+                  \PPPPPP.P\
+                  \RNBQKBNR"
+      let errorMessage = fromLeft [] $ advanceBoard board White ((8, 5), (7, 6))
+      errorMessage `shouldBe` "ERROR: Invalid move: Normal ((8,5),(7,6))"

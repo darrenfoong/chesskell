@@ -1,6 +1,6 @@
 module LogicSpec where
 
-import Board (mkBoard, readBoard)
+import Board (readBoard)
 import Data.Either (fromRight)
 import Data.Text (pack)
 import Logic (isInCheckmate)
