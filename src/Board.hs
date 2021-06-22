@@ -241,9 +241,7 @@ getPiece :: Board -> Position -> CPiece
 getPiece board (cn, rn) = board !! (rn -1) !! (cn -1)
 
 setPiece :: Board -> Position -> CPiece -> Board
-setPiece board (cn, rn) piece =
-  let (alteredBoard, _) = alterBoardRow board rn (\r -> alterRow r cn (const piece))
-   in alteredBoard
+setPiece board (cn, rn) piece = fst $ alterBoardRow board rn (\r -> alterRow r cn (const piece))
 
 removePiece :: Board -> Position -> (Board, CPiece)
 removePiece board (cn, rn) = alterBoardRow board rn (\r -> alterRow r cn (const Null))
